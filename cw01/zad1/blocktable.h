@@ -1,34 +1,22 @@
 /*
-example include file
-*/
-
-/*
-Mateusz Buta
-
-Zadanie 1. Alokacja tablicy z wskaźnikami na bloki pamięci zawierające znaki (25%)
-Zaprojektuj i przygotuj zestaw funkcji (bibliotekę) do zarządzania tablicą bloków zawierającą znaki.
-
-Biblioteka powinna umozliwiać:
-
-- tworzenie i usuwanie tablicy
-
-- dodanie i usunięcie bloków na które wskazują wybrane indeksy elementów tablicy
-
-- wyszukiwanie bloku w tablicy, którego suma znaków (kodów Ascii) w bloku jest najbliższa elementowi o zadanym numerze,
-
-Tablice i bloki alokowane powinny być przy pomocy funkcji calloc (alokacja dynamiczna) jak również powinny wykorzystywać tablicę dwuwymiarowa (statyczny przydział pamięci).
-
-Przygotuj plik Makefile, zawierający polecenia kompilujące pliki źródłowe biblioteki oraz tworzące biblioteki w dwóch wersjach: statyczną i dzieloną.
+Created by Mateusz Buta 10/03/2018
 */
 
 //Statically allocated table
-char* makeStaticTab(int blockNumber);
+
+
+char* createStaticTab(int blocksNumber, int blockSize);
 void deleteStaticTab();
-void addBlockStaticTab(int index,char *content);
-void deleteBlockStaticTab(int index);
+int addBlockStaticTab(int index,char *content);
+int deleteBlockStaticTab(int index);
+char* searchStaticTab(int asciiSumTemplate);
+void printStaticTab();
+
 //Dynamically allocated table
 
-char** makeDynamicTab(int blockNumber,int blockSize);
-void deleteDynamicTab(char** blockTab);
-void addBlockDynamicTab(char** blockTab,int index,char *content);
-void deleteBlockDynamicTab(char** blockTab,int index);
+char** createDynamicTab(int blocksNumber,int blockSize);
+void deleteDynamicTab(char** blockTab,int blocksNumber);
+int addBlockDynamicTab(char** blockTab,int blocksNumber,int index,char *content);
+int deleteBlockDynamicTab(char** blockTab,int blocksNumber,int index);
+char* searchDynamicTab(char** blockTab,int blocksNumber,int asciiSumTemplate);
+void printDynamicTab(char** blockTab,int blocksNumber);
