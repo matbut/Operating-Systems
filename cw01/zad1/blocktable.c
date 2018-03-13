@@ -19,6 +19,8 @@ int BLOCKSNUMBER=0;
 int BLOCKSIZE=0;
 
 char* createStaticTab(int blocksNumber, int blockSize){
+	if (blocksNumber>MAXBLOCKSNUMBER || blockSize>MAXBLOCKSIZE)
+		return NULL;
 	BLOCKSNUMBER=blocksNumber;
 	BLOCKSIZE=blockSize;
 	for(int idx=0;idx<BLOCKSNUMBER;idx++){
@@ -59,9 +61,8 @@ void printStaticTab(){
 }
 
 char* searchStaticTab(int asciiSumTemplate){
-
 	int foundDiff=INT_MAX;
-	int foundIdx=-1;
+	char *foundString=NULL;
 
 	for(int idx=0;idx<BLOCKSNUMBER;idx++){
 		if(OCCUPIED[idx]){
@@ -72,13 +73,11 @@ char* searchStaticTab(int asciiSumTemplate){
 			int diff=abs(asciiSumTemplate-asciiSum);
 			if(diff<foundDiff){
 				foundDiff=diff;
-				foundIdx=idx;
+				foundString=&DATA[idx][0];
 			}
 		}	
 	}
-	if(foundIdx==-1)
-		return NULL;
-	return &DATA[foundIdx][0];
+	return foundString;
 }
 
 //Dynamically allocated table
@@ -93,8 +92,6 @@ char** createDynamicTab(int blocksNumber,int blockSize){
 }
 
 void deleteDynamicTab(char** blockTab,int blocksNumber){
-
-
 	for(int i=0;i<blocksNumber;i++){
 		free(blockTab[i]);
 	}	
@@ -102,7 +99,6 @@ void deleteDynamicTab(char** blockTab,int blocksNumber){
 }
 
 int addBlockDynamicTab(char** blockTab,int blocksNumber,int index,char *content){
-
 	if(index>=blocksNumber || blockTab[index]!=NULL)
 		return -1;
 
@@ -112,18 +108,17 @@ int addBlockDynamicTab(char** blockTab,int blocksNumber,int index,char *content)
 }
 
 int deleteBlockDynamicTab(char** blockTab,int blocksNumber,int index){
-
 	if(index>=blocksNumber)
 		return -1;
+
 	free(blockTab[index]);
 	blockTab[index]=NULL;
 	return 0;
 }
 
 char* searchDynamicTab(char** blockTab,int blocksNumber,int asciiSumTemplate){
-
 	int foundDiff=INT_MAX;
-	int foundIdx=-1;
+	char *foundString=NULL;
 
 	for(int idx=0;idx<blocksNumber;idx++){
 		if(blockTab[idx]!=NULL){
@@ -135,13 +130,11 @@ char* searchDynamicTab(char** blockTab,int blocksNumber,int asciiSumTemplate){
 			int diff=abs(asciiSumTemplate-asciiSum);
 			if(diff<foundDiff){
 				foundDiff=diff;
-				foundIdx=idx;
+				foundString=blockTab[idx];
 			}
 		}	
 	}
-	if(foundIdx==-1)
-		return NULL;
-	return blockTab[foundIdx];
+	return foundString;
 }
 
 void printDynamicTab(char** blockTab,int blocksNumber){

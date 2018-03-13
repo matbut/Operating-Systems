@@ -1,27 +1,23 @@
 CC=gcc
-CFLAGS=-Wall -std=c99 -I.
-LIB_NAME=blocktable
+CFLAGS=-Wall -std=c11  
+CPPFLAGS=
+LIBNAME=blocktable
 
-#first default rule
-all: static shared
+all: static shared clean
 
-static: $(LIB_NAME).c
-	#Compile static library (if file change)
-	$(CC) -c $(LIB_NAME).c -o $(LIB_NAME).o $(CFLAGS)
+static:
 
-	#Build static library .a
-	ar rcs lib$(LIB_NAME).a $(LIB_NAME).o 
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $(LIBNAME).c -o $(LIBNAME).o
 
-	make clean
+	ar rcs lib$(LIBNAME).a $(LIBNAME).o 
 
-shared: $(LIB_NAME).c
-	#Compile shared library .so (if file change)
-	$(CC) -fPIC -c $(LIB_NAME).c -o $(LIB_NAME).o $(CFLAGS)
-	$(CC) -fPIC -shared -o lib$(LIB_NAME).so $(LIB_NAME).o $(CFLAGS)
+shared:
 
-	make clean
+	$(CC) $(CFLAGS) $(CPPFLAGS) -fPIC -shared $(LIBNAME).c -o lib$(LIBNAME).so  
+
+.PHONY: clean 
 
 clean:
-	rm -f *.o
+	rm -rf *.o
 
 

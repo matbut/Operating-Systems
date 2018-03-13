@@ -1,45 +1,109 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
-#include <../zad1/blocktable.h>
+#include <getopt.h>
 #include <string.h>
 #include <time.h>
-#include <stdlib.h>
-#include <stdbool.h>
+
+#include "./../zad1/blocktable.h"
 
 #define DATATEMPLATESIZE 20
 
 char *generate_data(int dataSize);
 
-int main(int argsNumber, char **args) {
-	srand(time(0)); 
-	/*
-		argv[0]-prog name
-		argv[1]-blocks number
-		argv[2]-block size
-		argv[3]-alocation 
-		argv[4]-operations
-	*/
+//A static global variable or a function is "seen" only in the file it's declared in
+static int staticAlocationFlag;
+static int blockSize;
+static int blocksNumber;
 
-	if(argsNumber < 5){
-		printf("Illegal arguments number\n");
-		return 1;
-	}
+int main (int argc, char **argv){
+	srand(time(0));
+  int c;
+  while (1){    
+      static struct option long_options[] =
+        {
+          /* These options set a flag. */
+          {"static",    no_argument, &staticAlocationFlag, 1},
+          {"dynamic",   no_argument, &staticAlocationFlag, 0},
+          /* These options don’t set a flag.
+             We distinguish them by their indices. */
+          {"blocksNum", required_argument, 0, 'n'},
+          {"blockLen",  required_argument, 0, 'l'},
+          {"create",    no_argument      , 0, 'c'},
+          {"add",       required_argument, 0, 'a'},
+          {"delete",    required_argument, 0, 'd'},
+          {"alter",     required_argument, 0, 'r'},
+          {"search",    required_argument, 0, 's'},
+          {"help",      required_argument, 0, 'h'},
+          {0, 0, 0, 0}
+        };
+      /* getopt_long stores the option index here. */
+      int option_index = 0;
 
-    int blocksNumber = (int) strtol(args[1], NULL, 10);
-    int blockSize = (int) strtol(args[2], NULL, 10);
-		
-	bool isStaticAlocation;
-    if (strcmp(args[3], "static"))
-		isStaticAlocation=true;
-	else if (strcmp(args[3], "dynamic"))
-        isStaticAlocation = false;
-	else{
-        printf("Illegal allocation type\n");
-        return 1;
+      c = getopt_long (argc, argv, "cn:l:a:d:r:s:",long_options, &option_index);
+
+      /* Detect the end of the options. */
+      if (c == -1)
+        break;
+
+      switch (c){
+        case 0:
+        //Flags
+        break;
+        case 'n':
+          //Specify blocks number
+          blocksNumber=atoi(optarg);
+          break;
+
+        case 'l':
+          //Specify blocks length
+          blockSize=atoi(optarg);
+          break;
+
+        case 'c':
+          //Create table
+          break;
+
+        case 'a':
+          //Add [n] blocks
+          break;
+
+        case 'd':
+          //Delete [n] blocks
+          break;
+
+        case 'r':
+          puts("ala\n");
+          //Alterly add and delete [n] blocks
+          break;
+
+        case 's':
+          //Search match block with [n] ascii sum
+          break;
+
+        case '?':
+          /* getopt_long already printed an error message. */
+          break;
+
+        default:
+          abort();
+          //printf("Illegal statement: %s");
+		    	//exit(EXIT_FAILURE);	
+      }
+  }
+
+    if(staticAlocationFlag)
+      puts("Statis");
+  /* Print any remaining command line arguments (not options). */
+  if (optind < argc)
+    {
+      printf ("non-option ARGV-elements: ");
+      while (optind < argc)
+        printf ("%s ", argv[optind++]);
+      putchar ('\n');
     }
 
-
+  createStaticTab(10,10);
 	
 	createStaticTab(blocksNumber,blockSize);
 
@@ -71,8 +135,11 @@ int main(int argsNumber, char **args) {
 	else
 		printf("BRAK");
 
-	return 0;
+	return EXIT_SUCCESS;
 }
+  
+
+
 
 char *generate_data(int dataSize) {
 	const char* dataTemplate[DATATEMPLATESIZE] = {
@@ -102,5 +169,3 @@ char *generate_data(int dataSize) {
 	strncpy(resultData,dataTemplate[rand()%DATATEMPLATESIZE],dataSize);
 	return resultData; 
 }
-
-	

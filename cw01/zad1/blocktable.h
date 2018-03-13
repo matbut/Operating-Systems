@@ -2,6 +2,9 @@
 Created by Mateusz Buta 10/03/2018
 */
 
+#ifndef BLOCK_TABLE_H
+#define BLOCK_TABLE_H
+
 //Statically allocated table
 
 
@@ -20,3 +23,5 @@ int addBlockDynamicTab(char** blockTab,int blocksNumber,int index,char *content)
 int deleteBlockDynamicTab(char** blockTab,int blocksNumber,int index);
 char* searchDynamicTab(char** blockTab,int blocksNumber,int asciiSumTemplate);
 void printDynamicTab(char** blockTab,int blocksNumber);
+
+#endif //BLOCK_TABLE_H

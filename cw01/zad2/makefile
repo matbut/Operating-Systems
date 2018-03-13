@@ -1,19 +1,15 @@
 CC=gcc
-CFLAGS=-Wall -std=c99 -I.
-PROG_NAME=timemeasurement
-LIB=../zad1/libblocktable.a
+CFLAGS=-Wall -std=c11 
+CPPFLAGS=
+LDFLAGS=
+LIBNAME=blocktable
+LIBPATH=./../zad1
+PROGNAME=timemeasurement
 
-#first default rule
-all: build run clean
+$(PROGNAME): $(PROGNAME).c 
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $^ -static -L$(LIBPATH) -l$(LIBNAME) -o $@
 
-build: $(PROG_NAME).c
-	#Compile (if file change)
-	$(CC) -o $(PROG_NAME) $(PROG_NAME).c $(LIB) $(CFLAGS)
-
-run:
-	./$(PROG_NAME) 3 3 static 3 3
+.PHONY: clean
 
 clean:
-	rm -f *.o
-
-
+	-rm -rf *.o $(PROGNAME)
