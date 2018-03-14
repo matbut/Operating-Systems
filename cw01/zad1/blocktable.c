@@ -36,17 +36,17 @@ void deleteStaticTab(){
 
 int addBlockStaticTab(int index,char *content){
 	if(OCCUPIED[index] || index>=BLOCKSNUMBER || strlen(content)>BLOCKSIZE)
-		return -1;
+		return EXIT_FAILURE;
 	OCCUPIED[index]=true;
 	strcpy(DATA[index],content);
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int deleteBlockStaticTab(int index){
 	if(index>=BLOCKSNUMBER)
-		return -1;
+		return EXIT_FAILURE;
 	OCCUPIED[index]=false;
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 void printStaticTab(){
@@ -100,20 +100,20 @@ void deleteDynamicTab(char** blockTab,int blocksNumber){
 
 int addBlockDynamicTab(char** blockTab,int blocksNumber,int index,char *content){
 	if(index>=blocksNumber || blockTab[index]!=NULL)
-		return -1;
+		return EXIT_FAILURE;
 
 	blockTab[index]=malloc(strlen(content));
 	strcpy(blockTab[index],content);
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 int deleteBlockDynamicTab(char** blockTab,int blocksNumber,int index){
-	if(index>=blocksNumber)
-		return -1;
+	if(index>=blocksNumber || blockTab[index]==NULL)
+		return EXIT_FAILURE;
 
 	free(blockTab[index]);
 	blockTab[index]=NULL;
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 char* searchDynamicTab(char** blockTab,int blocksNumber,int asciiSumTemplate){

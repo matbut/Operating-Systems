@@ -16,6 +16,16 @@ static int staticAlocationFlag;
 static int blockSize;
 static int blocksNumber;
 
+static char* staticTable;
+static char** dynamicTable;
+
+int createTable(int blocksNumber,int blockSize);
+int insertBlocks(int number);
+int deleteBlocks(int number);
+int alterBlocks(int number);
+int searchTable(int asciiSum);
+char *generate_data(int dataSize);
+
 int main (int argc, char **argv){
 	srand(time(0));
   int c;
@@ -30,9 +40,9 @@ int main (int argc, char **argv){
           {"blocksNum", required_argument, 0, 'n'},
           {"blockLen",  required_argument, 0, 'l'},
           {"create",    no_argument      , 0, 'c'},
-          {"add",       required_argument, 0, 'a'},
+          {"insert",    required_argument, 0, 'i'},
           {"delete",    required_argument, 0, 'd'},
-          {"alter",     required_argument, 0, 'r'},
+          {"alter",     required_argument, 0, 'a'},
           {"search",    required_argument, 0, 's'},
           {"help",      required_argument, 0, 'h'},
           {0, 0, 0, 0}
@@ -40,7 +50,7 @@ int main (int argc, char **argv){
       /* getopt_long stores the option index here. */
       int option_index = 0;
 
-      c = getopt_long (argc, argv, "cn:l:a:d:r:s:",long_options, &option_index);
+      c = getopt_long (argc, argv, "cn:l:i:d:a:s:h",long_options, &option_index);
 
       /* Detect the end of the options. */
       if (c == -1)
@@ -54,37 +64,36 @@ int main (int argc, char **argv){
           //Specify blocks number
           blocksNumber=atoi(optarg);
           break;
-
         case 'l':
           //Specify blocks length
           blockSize=atoi(optarg);
           break;
-
         case 'c':
-          //Create table
+          printf("Create table\n");
+          if(!createTable(blocksNumber,blockSize)){
+            printf("Can't create table.");
+            return EXIT_FAILURE;
+          }
           break;
-
-        case 'a':
-          //Add [n] blocks
+        case 'i':
+          //Insert [n] blocks
+          insertBlocks(atoi(optarg));
           break;
-
         case 'd':
           //Delete [n] blocks
+          deleteBlocks(atoi(optarg));
           break;
-
-        case 'r':
-          puts("ala\n");
+        case 'a':
+          alterBlocks(atoi(optarg));
           //Alterly add and delete [n] blocks
           break;
-
         case 's':
           //Search match block with [n] ascii sum
+          searchTable(atoi(optarg));
           break;
-
         case '?':
           /* getopt_long already printed an error message. */
           break;
-
         default:
           abort();
           //printf("Illegal statement: %s");
@@ -92,8 +101,6 @@ int main (int argc, char **argv){
       }
   }
 
-    if(staticAlocationFlag)
-      puts("Statis");
   /* Print any remaining command line arguments (not options). */
   if (optind < argc)
     {
@@ -103,43 +110,66 @@ int main (int argc, char **argv){
       putchar ('\n');
     }
 
-  createStaticTab(10,10);
-	
-	createStaticTab(blocksNumber,blockSize);
-
-	printStaticTab();
-
-	char*test=searchStaticTab(5);
-	if(test!=NULL)
-		printf("%s\n",test);
-	else
-		printf("BRAK");
-
-	addBlockStaticTab(1,generate_data(blockSize));
-
-	printStaticTab();
-
-	test=searchStaticTab(5);
-	if(test!=NULL)
-		printf("%s\n",test);
-	else
-		printf("BRAK");
-
-	deleteBlockStaticTab(1);
-
-	printStaticTab();
-	
-	test=searchStaticTab(5);
-	if(test!=NULL)
-		printf("%s\n",test);
-	else
-		printf("BRAK");
-
 	return EXIT_SUCCESS;
 }
   
+int createTable(int blocksNumber,int blockSize){
+  printf("%d %d %d %d",blocksNumber,blockSize,createStaticTab(999,999)==NULL,EXIT_FAILURE);
+  if(staticAlocationFlag){
+    staticTable=createStaticTab(blocksNumber,blockSize);
+      return staticTable!=NULL;
+  }else{
+    dynamicTable=createDynamicTab(blocksNumber,blockSize);
+      return dynamicTable!=NULL;
+  }
+}
+int insertBlocks(int number){
+  if(staticAlocationFlag)
+    for(int idx=0;idx<number;idx++)
+      if(!addBlockStaticTab(idx,generate_data(blockSize)))
+        return EXIT_FAILURE;
+  //Code copy-paste, but it works 2 times faster  
+  else
+    for(int idx=0;idx<number;idx++)
+      if(!addBlockDynamicTab(dynamicTable,blocksNumber,idx,generate_data(blockSize)))
+        return EXIT_FAILURE;
+  
+  return EXIT_SUCCESS;
+}
+int deleteBlocks(int number){
+  if(staticAlocationFlag)
+    for(int idx=0;idx<number;idx++)
+      if(!deleteBlockStaticTab(idx))
+        return EXIT_FAILURE;
+  //Code copy-paste, but it works 2 times faster  
+  else
+    for(int idx=0;idx<number;idx++)
+      if(!deleteBlockDynamicTab(dynamicTable,blocksNumber,idx))
+        return EXIT_FAILURE;
 
+  return EXIT_SUCCESS;
+}
+int alterBlocks(int number){
+  if(staticAlocationFlag)
+    for(int idx=0;idx<number;idx++)
+      if(!addBlockStaticTab(idx,generate_data(blockSize)) || !deleteBlockStaticTab(idx))
+        return EXIT_FAILURE;
+  //Code copy-paste, but it works 2 times faster  
+  else
+    for(int idx=0;idx<number;idx++)
+      if(!addBlockDynamicTab(dynamicTable,blocksNumber,idx,generate_data(blockSize)) || !deleteBlockDynamicTab(dynamicTable,blocksNumber,idx))
+        return EXIT_FAILURE;
 
+  return EXIT_SUCCESS;
+
+}
+int searchTable(int asciiSum){
+  if(staticAlocationFlag)
+    searchStaticTab(asciiSum);
+  else
+    searchDynamicTab(dynamicTable,blocksNumber,asciiSum);
+  return EXIT_SUCCESS;
+}
 
 char *generate_data(int dataSize) {
 	const char* dataTemplate[DATATEMPLATESIZE] = {
@@ -166,6 +196,7 @@ char *generate_data(int dataSize) {
 	};
 
 	char* resultData=calloc(dataSize,sizeof(char));
-	strncpy(resultData,dataTemplate[rand()%DATATEMPLATESIZE],dataSize);
+	strncpy(resultData,dataTemplate[rand()%DATATEMPLATESIZE],dataSize-1);
+  resultData[dataSize-1]='\0';
 	return resultData; 
 }
