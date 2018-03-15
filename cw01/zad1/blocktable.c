@@ -7,15 +7,20 @@ Created by Mateusz Buta 10/03/2018
 #include <stdbool.h>
 #include <string.h>
 #include <limits.h>
-
-#define MAXBLOCKSNUMBER 100
+						
+#define MAXBLOCKSNUMBER 10000005
 #define MAXBLOCKSIZE 100
 
 //Statically allocated table
-
 char DATA[MAXBLOCKSNUMBER][MAXBLOCKSIZE];
+
+//Rrepresents if table row is occupied
 bool OCCUPIED[MAXBLOCKSNUMBER];
+
+//Declared by user blocks number(tale size)
 int BLOCKSNUMBER=0;
+
+//Declared by user block size(string length)
 int BLOCKSIZE=0;
 
 char* createStaticTab(int blocksNumber, int blockSize){
@@ -52,7 +57,7 @@ int deleteBlockStaticTab(int index){
 void printStaticTab(){
 	printf("Static table\n");
 	for(int idx=0;idx<BLOCKSNUMBER;idx++){
-		printf("[%2.1d]",idx);
+		printf("[%d]",idx);
 		if(OCCUPIED[idx])
 			printf("%s\n",DATA[idx]);
 		else
@@ -140,7 +145,7 @@ char* searchDynamicTab(char** blockTab,int blocksNumber,int asciiSumTemplate){
 void printDynamicTab(char** blockTab,int blocksNumber){
 	printf("Dynamic table\n");
 	for(int idx=0;idx<blocksNumber;idx++){
-		printf("[%2.1d]",idx);
+		printf("[%d]",idx);
 		if(blockTab[idx]!=NULL)
 			printf("%s\n",blockTab[idx]);
 		else

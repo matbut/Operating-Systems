@@ -4,8 +4,20 @@
 #include <getopt.h>
 #include <string.h>
 #include <time.h>
+#include <sys/times.h>
+#include <unistd.h>
+#include <dlfcn.h>
 
+#ifndef DLL
 #include "./../zad1/blocktable.h"
+#endif
+
+#ifdef DLL
+void * dll;
+
+#endif
+
+
 
 #define DATATEMPLATESIZE 20
 
@@ -26,10 +38,19 @@ int alterBlocks(int number);
 int searchTable(int asciiSum);
 char *generate_data(int dataSize);
 
+void printHelp(char *progName);
+double countTime(clock_t start, clock_t end);
+int measureOperationTime(char c);
+
 int main (int argc, char **argv){
-	srand(time(0));
+  srand(time(0));
+  #ifdef DLL
+  dll = dlopen("./../zad1/blocktable.h", RTLD_LAZY);
+  #endif
+
+	
   int c;
-  while (1){    
+  while (true){    
       static struct option long_options[] =
         {
           /* These options set a flag. */
@@ -44,19 +65,20 @@ int main (int argc, char **argv){
           {"delete",    required_argument, 0, 'd'},
           {"alter",     required_argument, 0, 'a'},
           {"search",    required_argument, 0, 's'},
-          {"help",      required_argument, 0, 'h'},
+          {"print",     no_argument, 0, 'p'},
+          {"help",      no_argument, 0, 'h'},
           {0, 0, 0, 0}
         };
       /* getopt_long stores the option index here. */
       int option_index = 0;
 
-      c = getopt_long (argc, argv, "cn:l:i:d:a:s:h",long_options, &option_index);
+      c = getopt_long (argc, argv, "cn:l:i:d:a:s:ph",long_options, &option_index);
 
       /* Detect the end of the options. */
       if (c == -1)
         break;
 
-      switch (c){
+      switch(c){
         case 0:
         //Flags
         break;
@@ -68,36 +90,23 @@ int main (int argc, char **argv){
           //Specify blocks length
           blockSize=atoi(optarg);
           break;
-        case 'c':
-          printf("Create table\n");
-          if(!createTable(blocksNumber,blockSize)){
-            printf("Can't create table.");
-            return EXIT_FAILURE;
-          }
-          break;
-        case 'i':
-          //Insert [n] blocks
-          insertBlocks(atoi(optarg));
-          break;
-        case 'd':
-          //Delete [n] blocks
-          deleteBlocks(atoi(optarg));
-          break;
-        case 'a':
-          alterBlocks(atoi(optarg));
-          //Alterly add and delete [n] blocks
-          break;
-        case 's':
-          //Search match block with [n] ascii sum
-          searchTable(atoi(optarg));
-          break;
         case '?':
           /* getopt_long already printed an error message. */
           break;
+        case 'c':
+        case 'i':
+        case 'd':
+        case 'a':
+        case 'p':
+        case 's':
+          measureOperationTime(c);
+          break;
+        case 'h':
+          printHelp(argv[0]);
+        break;
         default:
           abort();
-          //printf("Illegal statement: %s");
-		    	//exit(EXIT_FAILURE);	
+
       }
   }
 
@@ -110,56 +119,126 @@ int main (int argc, char **argv){
       putchar ('\n');
     }
 
+  #ifdef DLL
+  dlclose(dll);
+  #endif
+
 	return EXIT_SUCCESS;
+}
+
+int measureOperationTime(char c){
+  
+      struct tms startTime;
+      clock_t startRealTime;
+      startRealTime = times(&startTime);
+
+      switch (c){
+        case 'c':
+          printf("+- Create table with %d bocks -+\n",blocksNumber);
+          if(createTable(blocksNumber,blockSize)==EXIT_FAILURE){
+            printf("Can't create table.\n");
+            return EXIT_FAILURE;
+          }
+          break;
+        case 'i':
+          printf("+---- Insert %s blocks ----+\n",optarg);
+          if(insertBlocks(atoi(optarg))==EXIT_FAILURE){
+            printf("Can't insert blocks.\n");
+            return EXIT_FAILURE;            
+          }
+          break;
+        case 'd':
+          printf("+---- Delete %s blocks ----+\n",optarg);
+          if(deleteBlocks(atoi(optarg))==EXIT_FAILURE){
+            printf("Can't delete blocks.\n");
+            return EXIT_FAILURE;            
+          }
+          break;
+        case 'a':
+          printf("+-- Alterly insert and delete %s blocks --+\n",optarg);
+          
+          if(alterBlocks(atoi(optarg))==EXIT_FAILURE){
+            printf("Can't alterly insert and delete blocks.\n");
+            return EXIT_FAILURE;            
+          }
+          break;
+        case 's':
+          printf("+-- Search match block with %s ascii sum --+\n",optarg);
+          searchTable(atoi(optarg));
+          break;
+        case 'p':
+          printf("+---- Print table ----+\n");
+          if(staticAlocationFlag)
+            printStaticTab();
+          else
+            printDynamicTab(dynamicTable,blocksNumber);
+          break;
+      }
+
+      struct tms endTime;
+      clock_t endRealTime;
+      endRealTime = times(&endTime);
+
+      printf("   Real      User      System\n");
+      printf("%lf   ", countTime(startRealTime, endRealTime));
+      printf("%lf   ", countTime(startTime.tms_utime, endTime.tms_utime));
+      printf("%lf ", countTime(startTime.tms_stime, endTime.tms_stime));
+      printf("\n");
+
+      return EXIT_SUCCESS;
+}
+
+double countTime(clock_t start, clock_t end) {
+  return (double) (end - start) / sysconf(_SC_CLK_TCK);
 }
   
 int createTable(int blocksNumber,int blockSize){
-  printf("%d %d %d %d",blocksNumber,blockSize,createStaticTab(999,999)==NULL,EXIT_FAILURE);
   if(staticAlocationFlag){
     staticTable=createStaticTab(blocksNumber,blockSize);
-      return staticTable!=NULL;
-  }else{
+      return staticTable==NULL ? EXIT_FAILURE : EXIT_SUCCESS;
+  //Code copy-paste, but it works 2 times faster 
+  }else{ 
     dynamicTable=createDynamicTab(blocksNumber,blockSize);
-      return dynamicTable!=NULL;
+      return dynamicTable==NULL ? EXIT_FAILURE : EXIT_SUCCESS;
   }
 }
 int insertBlocks(int number){
-  if(staticAlocationFlag)
+  if(staticAlocationFlag){
     for(int idx=0;idx<number;idx++)
-      if(!addBlockStaticTab(idx,generate_data(blockSize)))
+      if(addBlockStaticTab(idx,generate_data(blockSize))==EXIT_FAILURE)
         return EXIT_FAILURE;
-  //Code copy-paste, but it works 2 times faster  
-  else
+  //Code copy-paste, but it works 2 times faster 
+  }else{ 
     for(int idx=0;idx<number;idx++)
-      if(!addBlockDynamicTab(dynamicTable,blocksNumber,idx,generate_data(blockSize)))
+      if(addBlockDynamicTab(dynamicTable,blocksNumber,idx,generate_data(blockSize))==EXIT_FAILURE)
         return EXIT_FAILURE;
-  
+  }
   return EXIT_SUCCESS;
 }
 int deleteBlocks(int number){
-  if(staticAlocationFlag)
+  if(staticAlocationFlag){
     for(int idx=0;idx<number;idx++)
-      if(!deleteBlockStaticTab(idx))
+      if(deleteBlockStaticTab(idx)==EXIT_FAILURE)
         return EXIT_FAILURE;
   //Code copy-paste, but it works 2 times faster  
-  else
+  }else{
     for(int idx=0;idx<number;idx++)
-      if(!deleteBlockDynamicTab(dynamicTable,blocksNumber,idx))
+      if(deleteBlockDynamicTab(dynamicTable,blocksNumber,idx)==EXIT_FAILURE)
         return EXIT_FAILURE;
-
+  }
   return EXIT_SUCCESS;
 }
 int alterBlocks(int number){
-  if(staticAlocationFlag)
+  if(staticAlocationFlag){
     for(int idx=0;idx<number;idx++)
-      if(!addBlockStaticTab(idx,generate_data(blockSize)) || !deleteBlockStaticTab(idx))
+      if(addBlockStaticTab(idx,generate_data(blockSize))==EXIT_FAILURE || deleteBlockStaticTab(idx)==EXIT_FAILURE)
         return EXIT_FAILURE;
   //Code copy-paste, but it works 2 times faster  
-  else
+  }else{
     for(int idx=0;idx<number;idx++)
-      if(!addBlockDynamicTab(dynamicTable,blocksNumber,idx,generate_data(blockSize)) || !deleteBlockDynamicTab(dynamicTable,blocksNumber,idx))
+      if(addBlockDynamicTab(dynamicTable,blocksNumber,idx,generate_data(blockSize))==EXIT_FAILURE || deleteBlockDynamicTab(dynamicTable,blocksNumber,idx)==EXIT_FAILURE)
         return EXIT_FAILURE;
-
+  }
   return EXIT_SUCCESS;
 
 }
@@ -199,4 +278,19 @@ char *generate_data(int dataSize) {
 	strncpy(resultData,dataTemplate[rand()%DATATEMPLATESIZE],dataSize-1);
   resultData[dataSize-1]='\0';
 	return resultData; 
+}
+void printHelp(char *progName){
+  printf("Usage help\n");
+  printf("%s [-sdblcidasph]\n",progName);
+  printf("--static        -s        no argument\n");
+  printf("--dynamic       -d        no argument\n");
+  printf("--blocksNum     -n        required_argument\n");
+  printf("--blockLen      -l        required_argument\n");
+  printf("--create        -c        no_argument\n");
+  printf("--insert        -i        required_argument\n");
+  printf("--delete        -d        required_argument\n");
+  printf("--alter         -a        required_argument\n");
+  printf("--search        -s        required_argument\n");
+  printf("--print         -p        no_argument\n");
+  printf("--help          -h        no_argument\n");
 }
