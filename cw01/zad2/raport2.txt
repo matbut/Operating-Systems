@@ -1,9 +1,16 @@
+WNIOSKI:
+- statyczna tablica tworzy się szybciej od dynamiczne, choć w obu następuje iteracja po całej tablicy
+- wstawianie do tablicy statycznej zajmuje niewiele mniej czasu niż do dynamicznej, alokacja pamięci nie zajmuje aż tyle czasy co kopiowanie napisów
+- wyszukiwanie w tablic statycznej działa dużo szybciej
+- Usuwanie elementów tablicy dynamicznej zajmuje tyle samo czasu co utworzenie nowej tablicy dynamiczne, w tablic statycznej czas usuwania jest niezauważalny
+- Wstawianie na zmianę w tablicy dynamicznej jest wyraźnie szybsze od wstawiania i usuwania hurtem. Tablica statyczna nadal jest szybsza, ale różnica nie jest już taka duża
+
 ---- Create dynamic table with 10000000 bocks ----
    Real      User      System
-0.080000   0.040000   0.040000 
+0.060000   0.020000   0.040000 
 ---- Insert 10000000 blocks into dynamic table ----
    Real      User      System
-1.110000   0.920000   0.180000 
+1.150000   1.010000   0.140000 
 ---- Search match block with 130 ascii sum in dynamic table ----
    Real      User      System
 0.090000   0.090000   0.000000 
@@ -12,19 +19,19 @@
 0.020000   0.020000   0.000000 
 ---- Alterly insert and delete 1000000 blocks from dynamic table----
    Real      User      System
-0.090000   0.090000   0.000000 
----- Create dynamic table with 10000000 bocks ----
+0.100000   0.090000   0.000000 
+---- Create static table with 10000000 bocks ----
    Real      User      System
-0.070000   0.030000   0.030000 
----- Insert 10000000 blocks into dynamic table ----
+0.030000   0.020000   0.000000 
+---- Insert 10000000 blocks into static table ----
    Real      User      System
-1.150000   0.940000   0.190000 
----- Search match block with 130 ascii sum in dynamic table ----
+1.160000   0.850000   0.310000 
+---- Search match block with 130 ascii sum in static table ----
    Real      User      System
-0.090000   0.100000   0.000000 
----- Delete 1000000 blocks from dynamic table ----
+0.030000   0.030000   0.000000 
+---- Delete 1000000 blocks from static table ----
    Real      User      System
-0.020000   0.010000   0.000000 
----- Alterly insert and delete 1000000 blocks from dynamic table----
+0.000000   0.000000   0.000000 
+---- Alterly insert and delete 1000000 blocks from static table----
    Real      User      System
-0.090000   0.090000   0.000000 
+0.080000   0.080000   0.010000 

@@ -1,66 +1,68 @@
+WNIOSKI:
+Biblioteka wspoldzielona dziala w porównywalnym czasie do statycznej, choć statyczna miejscami bywa niewiele szybsza
 
  STATIC LIBRARY 
 
+---- Create static table with 10000000 bocks ----
+   Real      User      System
+0.030000   0.030000   0.000000 
+---- Insert 10000000 blocks into static table ----
+   Real      User      System
+1.130000   0.820000   0.300000 
+---- Search match block with 130 ascii sum in static table ----
+   Real      User      System
+0.030000   0.030000   0.000000 
+---- Delete 1000000 blocks from static table ----
+   Real      User      System
+0.000000   0.010000   0.000000 
+---- Alterly insert and delete 1000000 blocks from static table----
+   Real      User      System
+0.090000   0.080000   0.000000 
 ---- Create dynamic table with 10000000 bocks ----
    Real      User      System
-0.060000   0.030000   0.030000 
+0.060000   0.030000   0.010000 
 ---- Insert 10000000 blocks into dynamic table ----
    Real      User      System
-1.100000   0.920000   0.170000 
+1.100000   0.930000   0.180000 
 ---- Search match block with 130 ascii sum in dynamic table ----
    Real      User      System
-0.090000   0.100000   0.000000 
+0.090000   0.090000   0.000000 
 ---- Delete 1000000 blocks from dynamic table ----
    Real      User      System
-0.020000   0.010000   0.000000 
+0.020000   0.020000   0.000000 
 ---- Alterly insert and delete 1000000 blocks from dynamic table----
    Real      User      System
 0.090000   0.090000   0.000000 
+
+ SHARED LIBRARY 
+
+---- Create static table with 10000000 bocks ----
+   Real      User      System
+0.020000   0.020000   0.000000 
+---- Insert 10000000 blocks into static table ----
+   Real      User      System
+1.130000   0.800000   0.320000 
+---- Search match block with 130 ascii sum in static table ----
+   Real      User      System
+0.040000   0.030000   0.000000 
+---- Delete 1000000 blocks from static table ----
+   Real      User      System
+0.000000   0.010000   0.000000 
+---- Alterly insert and delete 1000000 blocks from static table----
+   Real      User      System
+0.080000   0.070000   0.010000 
 ---- Create dynamic table with 10000000 bocks ----
    Real      User      System
-0.050000   0.020000   0.020000 
+0.060000   0.020000   0.020000 
 ---- Insert 10000000 blocks into dynamic table ----
    Real      User      System
-1.100000   0.960000   0.140000 
+1.110000   0.920000   0.200000 
 ---- Search match block with 130 ascii sum in dynamic table ----
    Real      User      System
-0.090000   0.090000   0.000000 
+0.100000   0.100000   0.000000 
 ---- Delete 1000000 blocks from dynamic table ----
    Real      User      System
 0.010000   0.020000   0.000000 
 ---- Alterly insert and delete 1000000 blocks from dynamic table----
    Real      User      System
-0.090000   0.080000   0.000000 
-
- SHARED LIBRARY 
-
----- Create dynamic table with 10000000 bocks ----
-   Real      User      System
-0.050000   0.020000   0.020000 
----- Insert 10000000 blocks into dynamic table ----
-   Real      User      System
-1.130000   0.960000   0.170000 
----- Search match block with 130 ascii sum in dynamic table ----
-   Real      User      System
-0.100000   0.100000   0.000000 
----- Delete 1000000 blocks from dynamic table ----
-   Real      User      System
-0.010000   0.010000   0.000000 
----- Alterly insert and delete 1000000 blocks from dynamic table----
-   Real      User      System
-0.090000   0.090000   0.000000 
----- Create dynamic table with 10000000 bocks ----
-   Real      User      System
-0.050000   0.030000   0.020000 
----- Insert 10000000 blocks into dynamic table ----
-   Real      User      System
-1.120000   0.930000   0.190000 
----- Search match block with 130 ascii sum in dynamic table ----
-   Real      User      System
-0.100000   0.100000   0.000000 
----- Delete 1000000 blocks from dynamic table ----
-   Real      User      System
-0.020000   0.010000   0.000000 
----- Alterly insert and delete 1000000 blocks from dynamic table----
-   Real      User      System
-0.090000   0.090000   0.000000 
+0.100000   0.090000   0.000000 

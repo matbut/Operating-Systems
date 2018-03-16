@@ -24,12 +24,12 @@ dynamic: $(PROGPATH)/$(PROGNAME).c
 
 raport: all
 	echo '\n STATIC LIBRARY \n' | tee -a $(FILE)
-	./$(PROGNAME)_static -n 10000000 -l 20 -c -i 10000000 -s 130 -d 1000000 -a 1000000 | tee -a $(FILE)
-	./$(PROGNAME)_static -n 10000000 -l 20 -c -i 10000000 -s 130 -d 1000000 -a 1000000 | tee -a $(FILE)
+	./$(PROGNAME)_static --static -n 10000000 -l 20 -c -i 10000000 -s 130 -d 1000000 -a 1000000 | tee -a $(FILE)
+	./$(PROGNAME)_static --dynamic -n 10000000 -l 20 -c -i 10000000 -s 130 -d 1000000 -a 1000000 | tee -a $(FILE)
 
 	echo '\n SHARED LIBRARY \n' | tee -a $(FILE)
-	./$(PROGNAME)_shared -n 10000000 -l 20 -c -i 10000000 -s 130 -d 1000000 -a 1000000 | tee -a $(FILE)
-	./$(PROGNAME)_shared -n 10000000 -l 20 -c -i 10000000 -s 130 -d 1000000 -a 1000000 | tee -a $(FILE)
+	./$(PROGNAME)_shared --static -n 10000000 -l 20 -c -i 10000000 -s 130 -d 1000000 -a 1000000 | tee -a $(FILE)
+	./$(PROGNAME)_shared --dynamic -n 10000000 -l 20 -c -i 10000000 -s 130 -d 1000000 -a 1000000 | tee -a $(FILE)
 
 .PHONY: clean
 
