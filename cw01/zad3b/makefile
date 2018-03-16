@@ -2,7 +2,8 @@ CC=gcc
 CFLAGS=-Wall -std=c11 -ggdb
 CPPFLAGS=
 LDFLAGS=
-LIBNAME=blocktable
+LIBNAMESTATIC=blocktablestatic
+LIBNAMESHARED=blocktableshared
 LIBPATH=./../zad1
 PROGNAME=timemeasurement
 PROGPATH=./../zad2
@@ -18,11 +19,11 @@ one_all: static shared dynamic
 
 static: $(PROGPATH)/$(PROGNAME).c 
 
-	$(CC) $(CFLAGS) $(CPPFLAGS) $^ -static $(LDFLAGS) -L$(LIBPATH) -l$(LIBNAME) -o $(PROGNAME)_$@_O$(optim) -O$(optim)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $^ $(LDFLAGS) -L$(LIBPATH) -l$(LIBNAMESTATIC) -o $(PROGNAME)_$@_O$(optim) -O$(optim)
 
 shared: $(PROGPATH)/$(PROGNAME).c 
 
-	$(CC) $(CFLAGS) $(CPPFLAGS) $^ -Wl,-rpath=$(LIBPATH) $(LDFLAGS) -L$(LIBPATH) -l$(LIBNAME) -o $(PROGNAME)_$@_O$(optim) -O$(optim)
+	$(CC) $(CFLAGS) $(CPPFLAGS) $^ -Wl,-rpath=$(LIBPATH) $(LDFLAGS) -L$(LIBPATH) -l$(LIBNAMESHARED) -o $(PROGNAME)_$@_O$(optim) -O$(optim)
 
 dynamic: $(PROGPATH)/$(PROGNAME).c 
 
@@ -37,6 +38,9 @@ one_raport: one_all
 	./$(PROGNAME)_shared_O$(optim) --static -n 10000000 -l 20 -c -i 10000000 -s 130 -d 1000000 -a 1000000 | tee -a $(FILE)
 	./$(PROGNAME)_shared_O$(optim) --dynamic -n 10000000 -l 20 -c -i 10000000 -s 130 -d 1000000 -a 1000000 | tee -a $(FILE)
 
+	echo '\n DYNAMIC LIBRARY \n' $(optim) 'optimization' | tee -a $(FILE)
+	./$(PROGNAME)_dynamic_O$(optim) --static -n 10000000 -l 20 -c -i 10000000 -s 130 -d 1000000 -a 1000000 | tee -a $(FILE)
+	./$(PROGNAME)_dynamic_O$(optim) --dynamic -n 10000000 -l 20 -c -i 10000000 -s 130 -d 1000000 -a 1000000 | tee -a $(FILE)
 
 raport: 
 	make one_raport optim=0

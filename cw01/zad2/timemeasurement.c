@@ -47,7 +47,7 @@ char* alocationType(){
 int main (int argc, char **argv){
   srand(time(0));
   #ifdef DLL
-  dll = dlopen("./../zad1/blocktable.h", RTLD_LAZY);
+  dll = dlopen("./../zad1/libblocktableshared.so", RTLD_LAZY);
   #endif
 
 	

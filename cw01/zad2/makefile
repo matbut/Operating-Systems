@@ -2,13 +2,13 @@ CC=gcc
 CFLAGS=-Wall -std=c11 -ggdb
 CPPFLAGS=
 LDFLAGS=
-LIBNAME=blocktable
+LIBNAME=blocktablestatic
 LIBPATH=./../zad1
 PROGNAME=timemeasurement
 FILE=raport2.txt
 
 $(PROGNAME): $(PROGNAME).c 
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $^ -static -L$(LIBPATH) -l$(LIBNAME) -o $@
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $^ -L$(LIBPATH) -l$(LIBNAME) -o $@
 
 raport: $(PROGNAME)
 	./$(PROGNAME) --dynamic -n 10000000 -l 20 -c -i 10000000 -s 130 -d 1000000 -a 1000000 | tee -a $(FILE)

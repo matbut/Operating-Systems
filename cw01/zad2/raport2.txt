@@ -5,33 +5,34 @@ WNIOSKI:
 - Usuwanie elementów tablicy dynamicznej zajmuje tyle samo czasu co utworzenie nowej tablicy dynamiczne, w tablic statycznej czas usuwania jest niezauważalny
 - Wstawianie na zmianę w tablicy dynamicznej jest wyraźnie szybsze od wstawiania i usuwania hurtem. Tablica statyczna nadal jest szybsza, ale różnica nie jest już taka duża
 
+
 ---- Create dynamic table with 10000000 bocks ----
    Real      User      System
-0.060000   0.020000   0.040000 
+0.070000   0.030000   0.030000 
 ---- Insert 10000000 blocks into dynamic table ----
    Real      User      System
-1.150000   1.010000   0.140000 
+1.080000   0.940000   0.150000 
 ---- Search match block with 130 ascii sum in dynamic table ----
    Real      User      System
-0.090000   0.090000   0.000000 
+0.110000   0.100000   0.000000 
 ---- Delete 1000000 blocks from dynamic table ----
    Real      User      System
-0.020000   0.020000   0.000000 
+0.010000   0.020000   0.000000 
 ---- Alterly insert and delete 1000000 blocks from dynamic table----
    Real      User      System
-0.100000   0.090000   0.000000 
+0.090000   0.080000   0.000000 
 ---- Create static table with 10000000 bocks ----
    Real      User      System
-0.030000   0.020000   0.000000 
+0.040000   0.020000   0.000000 
 ---- Insert 10000000 blocks into static table ----
    Real      User      System
-1.160000   0.850000   0.310000 
+1.320000   0.950000   0.380000 
 ---- Search match block with 130 ascii sum in static table ----
    Real      User      System
 0.030000   0.030000   0.000000 
 ---- Delete 1000000 blocks from static table ----
    Real      User      System
-0.000000   0.000000   0.000000 
+0.010000   0.000000   0.000000 
 ---- Alterly insert and delete 1000000 blocks from static table----
    Real      User      System
-0.080000   0.080000   0.010000 
+0.100000   0.100000   0.000000 
