@@ -1,0 +1,264 @@
+
+ STATIC LIBRARY 
+ 0 optimization
+---- Create dynamic table with 10000000 bocks ----
+   Real      User      System
+0.060000   0.030000   0.020000 
+---- Insert 10000000 blocks into dynamic table ----
+   Real      User      System
+1.100000   0.950000   0.140000 
+---- Search match block with 130 ascii sum in dynamic table ----
+   Real      User      System
+0.090000   0.100000   0.000000 
+---- Delete 1000000 blocks from dynamic table ----
+   Real      User      System
+0.010000   0.010000   0.000000 
+---- Alterly insert and delete 1000000 blocks from dynamic table----
+   Real      User      System
+0.090000   0.090000   0.000000 
+---- Create dynamic table with 10000000 bocks ----
+   Real      User      System
+0.060000   0.030000   0.010000 
+---- Insert 10000000 blocks into dynamic table ----
+   Real      User      System
+1.090000   0.940000   0.160000 
+---- Search match block with 130 ascii sum in dynamic table ----
+   Real      User      System
+0.090000   0.090000   0.000000 
+---- Delete 1000000 blocks from dynamic table ----
+   Real      User      System
+0.010000   0.010000   0.000000 
+---- Alterly insert and delete 1000000 blocks from dynamic table----
+   Real      User      System
+0.090000   0.090000   0.000000 
+
+ SHARED LIBRARY 
+ 0 optimization
+---- Create dynamic table with 10000000 bocks ----
+   Real      User      System
+0.060000   0.030000   0.020000 
+---- Insert 10000000 blocks into dynamic table ----
+   Real      User      System
+1.110000   0.960000   0.150000 
+---- Search match block with 130 ascii sum in dynamic table ----
+   Real      User      System
+0.100000   0.100000   0.000000 
+---- Delete 1000000 blocks from dynamic table ----
+   Real      User      System
+0.010000   0.020000   0.000000 
+---- Alterly insert and delete 1000000 blocks from dynamic table----
+   Real      User      System
+0.100000   0.090000   0.000000 
+---- Create dynamic table with 10000000 bocks ----
+   Real      User      System
+0.060000   0.020000   0.020000 
+---- Insert 10000000 blocks into dynamic table ----
+   Real      User      System
+1.110000   0.940000   0.170000 
+---- Search match block with 130 ascii sum in dynamic table ----
+   Real      User      System
+0.090000   0.100000   0.000000 
+---- Delete 1000000 blocks from dynamic table ----
+   Real      User      System
+0.020000   0.010000   0.000000 
+---- Alterly insert and delete 1000000 blocks from dynamic table----
+   Real      User      System
+0.090000   0.090000   0.000000 
+
+ STATIC LIBRARY 
+ 1 optimization
+---- Create dynamic table with 10000000 bocks ----
+   Real      User      System
+0.060000   0.030000   0.020000 
+---- Insert 10000000 blocks into dynamic table ----
+   Real      User      System
+1.030000   0.910000   0.130000 
+---- Search match block with 130 ascii sum in dynamic table ----
+   Real      User      System
+0.090000   0.090000   0.000000 
+---- Delete 1000000 blocks from dynamic table ----
+   Real      User      System
+0.020000   0.010000   0.000000 
+---- Alterly insert and delete 1000000 blocks from dynamic table----
+   Real      User      System
+0.080000   0.080000   0.000000 
+---- Create dynamic table with 10000000 bocks ----
+   Real      User      System
+0.060000   0.030000   0.010000 
+---- Insert 10000000 blocks into dynamic table ----
+   Real      User      System
+1.020000   0.850000   0.180000 
+---- Search match block with 130 ascii sum in dynamic table ----
+   Real      User      System
+0.090000   0.090000   0.000000 
+---- Delete 1000000 blocks from dynamic table ----
+   Real      User      System
+0.020000   0.010000   0.000000 
+---- Alterly insert and delete 1000000 blocks from dynamic table----
+   Real      User      System
+0.080000   0.080000   0.000000 
+
+ SHARED LIBRARY 
+ 1 optimization
+---- Create dynamic table with 10000000 bocks ----
+   Real      User      System
+0.060000   0.050000   0.000000 
+---- Insert 10000000 blocks into dynamic table ----
+   Real      User      System
+1.090000   0.930000   0.150000 
+---- Search match block with 130 ascii sum in dynamic table ----
+   Real      User      System
+0.090000   0.100000   0.000000 
+---- Delete 1000000 blocks from dynamic table ----
+   Real      User      System
+0.020000   0.010000   0.010000 
+---- Alterly insert and delete 1000000 blocks from dynamic table----
+   Real      User      System
+0.090000   0.090000   0.000000 
+---- Create dynamic table with 10000000 bocks ----
+   Real      User      System
+0.050000   0.030000   0.010000 
+---- Insert 10000000 blocks into dynamic table ----
+   Real      User      System
+1.090000   0.940000   0.160000 
+---- Search match block with 130 ascii sum in dynamic table ----
+   Real      User      System
+0.100000   0.090000   0.000000 
+---- Delete 1000000 blocks from dynamic table ----
+   Real      User      System
+0.010000   0.020000   0.000000 
+---- Alterly insert and delete 1000000 blocks from dynamic table----
+   Real      User      System
+0.090000   0.080000   0.000000 
+
+ STATIC LIBRARY 
+ 2 optimization
+---- Create dynamic table with 10000000 bocks ----
+   Real      User      System
+0.050000   0.020000   0.030000 
+---- Insert 10000000 blocks into dynamic table ----
+   Real      User      System
+1.080000   0.900000   0.170000 
+---- Search match block with 130 ascii sum in dynamic table ----
+   Real      User      System
+0.090000   0.090000   0.000000 
+---- Delete 1000000 blocks from dynamic table ----
+   Real      User      System
+0.010000   0.010000   0.000000 
+---- Alterly insert and delete 1000000 blocks from dynamic table----
+   Real      User      System
+0.090000   0.090000   0.000000 
+---- Create dynamic table with 10000000 bocks ----
+   Real      User      System
+0.060000   0.030000   0.010000 
+---- Insert 10000000 blocks into dynamic table ----
+   Real      User      System
+1.060000   0.900000   0.160000 
+---- Search match block with 130 ascii sum in dynamic table ----
+   Real      User      System
+0.090000   0.100000   0.000000 
+---- Delete 1000000 blocks from dynamic table ----
+   Real      User      System
+0.020000   0.010000   0.000000 
+---- Alterly insert and delete 1000000 blocks from dynamic table----
+   Real      User      System
+0.080000   0.090000   0.000000 
+
+ SHARED LIBRARY 
+ 2 optimization
+---- Create dynamic table with 10000000 bocks ----
+   Real      User      System
+0.050000   0.040000   0.010000 
+---- Insert 10000000 blocks into dynamic table ----
+   Real      User      System
+1.060000   0.920000   0.140000 
+---- Search match block with 130 ascii sum in dynamic table ----
+   Real      User      System
+0.110000   0.100000   0.000000 
+---- Delete 1000000 blocks from dynamic table ----
+   Real      User      System
+0.010000   0.010000   0.000000 
+---- Alterly insert and delete 1000000 blocks from dynamic table----
+   Real      User      System
+0.080000   0.090000   0.000000 
+---- Create dynamic table with 10000000 bocks ----
+   Real      User      System
+0.050000   0.010000   0.030000 
+---- Insert 10000000 blocks into dynamic table ----
+   Real      User      System
+1.060000   0.880000   0.180000 
+---- Search match block with 130 ascii sum in dynamic table ----
+   Real      User      System
+0.090000   0.100000   0.000000 
+---- Delete 1000000 blocks from dynamic table ----
+   Real      User      System
+0.020000   0.020000   0.000000 
+---- Alterly insert and delete 1000000 blocks from dynamic table----
+   Real      User      System
+0.080000   0.080000   0.000000 
+
+ STATIC LIBRARY 
+ s optimization
+---- Create dynamic table with 10000000 bocks ----
+   Real      User      System
+0.060000   0.030000   0.010000 
+---- Insert 10000000 blocks into dynamic table ----
+   Real      User      System
+1.170000   1.000000   0.180000 
+---- Search match block with 130 ascii sum in dynamic table ----
+   Real      User      System
+0.100000   0.090000   0.000000 
+---- Delete 1000000 blocks from dynamic table ----
+   Real      User      System
+0.010000   0.010000   0.000000 
+---- Alterly insert and delete 1000000 blocks from dynamic table----
+   Real      User      System
+0.090000   0.100000   0.000000 
+---- Create dynamic table with 10000000 bocks ----
+   Real      User      System
+0.050000   0.020000   0.020000 
+---- Insert 10000000 blocks into dynamic table ----
+   Real      User      System
+1.160000   0.990000   0.160000 
+---- Search match block with 130 ascii sum in dynamic table ----
+   Real      User      System
+0.090000   0.100000   0.000000 
+---- Delete 1000000 blocks from dynamic table ----
+   Real      User      System
+0.020000   0.010000   0.000000 
+---- Alterly insert and delete 1000000 blocks from dynamic table----
+   Real      User      System
+0.090000   0.100000   0.000000 
+
+ SHARED LIBRARY 
+ s optimization
+---- Create dynamic table with 10000000 bocks ----
+   Real      User      System
+0.060000   0.030000   0.020000 
+---- Insert 10000000 blocks into dynamic table ----
+   Real      User      System
+1.170000   0.970000   0.200000 
+---- Search match block with 130 ascii sum in dynamic table ----
+   Real      User      System
+0.100000   0.100000   0.000000 
+---- Delete 1000000 blocks from dynamic table ----
+   Real      User      System
+0.010000   0.020000   0.000000 
+---- Alterly insert and delete 1000000 blocks from dynamic table----
+   Real      User      System
+0.100000   0.090000   0.000000 
+---- Create dynamic table with 10000000 bocks ----
+   Real      User      System
+0.050000   0.020000   0.020000 
+---- Insert 10000000 blocks into dynamic table ----
+   Real      User      System
+1.170000   1.020000   0.150000 
+---- Search match block with 130 ascii sum in dynamic table ----
+   Real      User      System
+0.090000   0.090000   0.000000 
+---- Delete 1000000 blocks from dynamic table ----
+   Real      User      System
+0.010000   0.020000   0.000000 
+---- Alterly insert and delete 1000000 blocks from dynamic table----
+   Real      User      System
+0.100000   0.090000   0.000000 
