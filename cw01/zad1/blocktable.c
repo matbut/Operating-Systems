@@ -8,8 +8,7 @@ Created by Mateusz Buta 10/03/2018
 #include <string.h>
 #include <limits.h>
 						
-#define MAXBLOCKSNUMBER 10000005
-#define MAXBLOCKSIZE 100
+#include "blocktable.h"
 
 //Statically allocated table
 char DATA[MAXBLOCKSNUMBER][MAXBLOCKSIZE];
@@ -55,7 +54,6 @@ int deleteBlockStaticTab(int index){
 }
 
 void printStaticTab(){
-	printf("Static table\n");
 	for(int idx=0;idx<BLOCKSNUMBER;idx++){
 		printf("[%d]",idx);
 		if(OCCUPIED[idx])
@@ -143,7 +141,6 @@ char* searchDynamicTab(char** blockTab,int blocksNumber,int asciiSumTemplate){
 }
 
 void printDynamicTab(char** blockTab,int blocksNumber){
-	printf("Dynamic table\n");
 	for(int idx=0;idx<blocksNumber;idx++){
 		printf("[%d]",idx);
 		if(blockTab[idx]!=NULL)

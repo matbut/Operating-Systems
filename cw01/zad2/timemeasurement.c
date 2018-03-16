@@ -1,3 +1,4 @@
+#include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -6,7 +7,7 @@
 #include <time.h>
 #include <sys/times.h>
 #include <unistd.h>
-#include <dlfcn.h>
+
 
 #ifndef DLL
 #include "./../zad1/blocktable.h"
@@ -14,10 +15,7 @@
 
 #ifdef DLL
 void * dll;
-
 #endif
-
-
 
 #define DATATEMPLATESIZE 20
 
@@ -37,10 +35,14 @@ int deleteBlocks(int number);
 int alterBlocks(int number);
 int searchTable(int asciiSum);
 char *generate_data(int dataSize);
+void printTable();
 
 void printHelp(char *progName);
 double countTime(clock_t start, clock_t end);
 int measureOperationTime(char c);
+char* alocationType(){
+  return staticAlocationFlag ? "static" : "dynamic";
+}
 
 int main (int argc, char **argv){
   srand(time(0));
@@ -117,7 +119,7 @@ int main (int argc, char **argv){
       while (optind < argc)
         printf ("%s ", argv[optind++]);
       putchar ('\n');
-    }
+    } 
 
   #ifdef DLL
   dlclose(dll);
@@ -134,28 +136,28 @@ int measureOperationTime(char c){
 
       switch (c){
         case 'c':
-          printf("+- Create table with %d bocks -+\n",blocksNumber);
+          printf("---- Create %s table with %d bocks ----\n",alocationType(),blocksNumber);
           if(createTable(blocksNumber,blockSize)==EXIT_FAILURE){
             printf("Can't create table.\n");
             return EXIT_FAILURE;
           }
           break;
         case 'i':
-          printf("+---- Insert %s blocks ----+\n",optarg);
+          printf("---- Insert %s blocks into %s table ----\n",optarg,alocationType());
           if(insertBlocks(atoi(optarg))==EXIT_FAILURE){
             printf("Can't insert blocks.\n");
             return EXIT_FAILURE;            
           }
           break;
         case 'd':
-          printf("+---- Delete %s blocks ----+\n",optarg);
+          printf("---- Delete %s blocks from %s table ----\n",optarg,alocationType());
           if(deleteBlocks(atoi(optarg))==EXIT_FAILURE){
             printf("Can't delete blocks.\n");
             return EXIT_FAILURE;            
           }
           break;
         case 'a':
-          printf("+-- Alterly insert and delete %s blocks --+\n",optarg);
+          printf("---- Alterly insert and delete %s blocks from %s table----\n",optarg,alocationType());
           
           if(alterBlocks(atoi(optarg))==EXIT_FAILURE){
             printf("Can't alterly insert and delete blocks.\n");
@@ -163,15 +165,12 @@ int measureOperationTime(char c){
           }
           break;
         case 's':
-          printf("+-- Search match block with %s ascii sum --+\n",optarg);
+          printf("---- Search match block with %s ascii sum in %s table ----\n",optarg,alocationType());
           searchTable(atoi(optarg));
           break;
         case 'p':
-          printf("+---- Print table ----+\n");
-          if(staticAlocationFlag)
-            printStaticTab();
-          else
-            printDynamicTab(dynamicTable,blocksNumber);
+          printf("---- Print %s table ----\n",alocationType());
+          printTable();
           break;
       }
 
@@ -193,6 +192,12 @@ double countTime(clock_t start, clock_t end) {
 }
   
 int createTable(int blocksNumber,int blockSize){
+
+  #ifdef DLL
+  char* (*createStaticTab)(int blocksNumber, int blockSize) = dlsym(dll, "createStaticTab");
+  char** (*createDynamicTab)(int blocksNumber, int blockSize) = dlsym(dll, "createDynamicTab");
+  #endif
+
   if(staticAlocationFlag){
     staticTable=createStaticTab(blocksNumber,blockSize);
       return staticTable==NULL ? EXIT_FAILURE : EXIT_SUCCESS;
@@ -203,6 +208,12 @@ int createTable(int blocksNumber,int blockSize){
   }
 }
 int insertBlocks(int number){
+
+  #ifdef DLL
+  int (*addBlockStaticTab)(int index,char *content) = dlsym(dll, "addBlockStaticTab");
+  int (*addBlockDynamicTab)(char** blockTab,int blocksNumber,int index,char *content) = dlsym(dll, "addBlockDynamicTab");
+  #endif
+
   if(staticAlocationFlag){
     for(int idx=0;idx<number;idx++)
       if(addBlockStaticTab(idx,generate_data(blockSize))==EXIT_FAILURE)
@@ -216,6 +227,12 @@ int insertBlocks(int number){
   return EXIT_SUCCESS;
 }
 int deleteBlocks(int number){
+
+  #ifdef DLL
+  int (*deleteBlockStaticTab)(int index) = dlsym(dll, "deleteBlockStaticTab");
+  int (*deleteBlockDynamicTab)(char** blockTab,int blocksNumber,int index) = dlsym(dll, "deleteBlockDynamicTab");
+  #endif
+
   if(staticAlocationFlag){
     for(int idx=0;idx<number;idx++)
       if(deleteBlockStaticTab(idx)==EXIT_FAILURE)
@@ -229,6 +246,14 @@ int deleteBlocks(int number){
   return EXIT_SUCCESS;
 }
 int alterBlocks(int number){
+
+  #ifdef DLL
+  int (*addBlockStaticTab)(int index,char *content) = dlsym(dll, "addBlockStaticTab");
+  int (*addBlockDynamicTab)(char** blockTab,int blocksNumber,int index,char *content) = dlsym(dll, "addBlockDynamicTab");
+  int (*deleteBlockStaticTab)(int index) = dlsym(dll, "deleteBlockStaticTab");
+  int (*deleteBlockDynamicTab)(char** blockTab,int blocksNumber,int index) = dlsym(dll, "deleteBlockDynamicTab");
+  #endif
+
   if(staticAlocationFlag){
     for(int idx=0;idx<number;idx++)
       if(addBlockStaticTab(idx,generate_data(blockSize))==EXIT_FAILURE || deleteBlockStaticTab(idx)==EXIT_FAILURE)
@@ -243,11 +268,31 @@ int alterBlocks(int number){
 
 }
 int searchTable(int asciiSum){
+
+  #ifdef DLL
+  char* (*searchStaticTab)(int asciiSumTemplate) = dlsym(dll, "searchStaticTab");
+  char* (*searchDynamicTab)(char** blockTab,int blocksNumber,int asciiSumTemplate) = dlsym(dll, "searchDynamicTab");
+  #endif
+
   if(staticAlocationFlag)
     searchStaticTab(asciiSum);
   else
     searchDynamicTab(dynamicTable,blocksNumber,asciiSum);
   return EXIT_SUCCESS;
+}
+
+void printTable(){
+
+  #ifdef DLL
+  int (*printStaticTab)() = dlsym(dll, "printStaticTab");
+  int (*printDynamicTab)() = dlsym(dll, "printDynamicTab");
+  #endif
+    
+  if(staticAlocationFlag)
+    printStaticTab();
+  else
+    printDynamicTab(dynamicTable,blocksNumber);
+
 }
 
 char *generate_data(int dataSize) {

@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -std=c11  
+CFLAGS=-Wall -std=c11  -ggdb
 CPPFLAGS=
 LIBNAME=blocktable
 
