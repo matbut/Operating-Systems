@@ -10,20 +10,20 @@ Created by Mateusz Buta 10/03/2018
 
 //Statically allocated table
 
-char* createStaticTab(int blocksNumber, int blockSize);
+char* createStaticTab(int , int );
 void deleteStaticTab();
-int addBlockStaticTab(int index,char *content);
-int deleteBlockStaticTab(int index);
-char* searchStaticTab(int asciiSumTemplate);
+int addBlockStaticTab(int ,char *);
+int deleteBlockStaticTab(int );
+char* searchStaticTab(int );
 void printStaticTab();
 
 //Dynamically allocated table
 
-char** createDynamicTab(int blocksNumber,int blockSize);
-void deleteDynamicTab(char** blockTab,int blocksNumber);
-int addBlockDynamicTab(char** blockTab,int blocksNumber,int index,char *content);
-int deleteBlockDynamicTab(char** blockTab,int blocksNumber,int index);
-char* searchDynamicTab(char** blockTab,int blocksNumber,int asciiSumTemplate);
-void printDynamicTab(char** blockTab,int blocksNumber);
+char** createDynamicTab(int ,int );
+void deleteDynamicTab(char** ,int );
+int addBlockDynamicTab(char** ,int ,int ,char *);
+int deleteBlockDynamicTab(char** ,int ,int );
+char* searchDynamicTab(char** ,int ,int );
+void printDynamicTab(char** ,int );
 
 #endif //BLOCK_TABLE_H
