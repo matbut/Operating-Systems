@@ -14,13 +14,18 @@
 #include <limits.h>
 #include <stdint.h>
 
-const char data_format[] = "%Y-%m-%d %H:%M:%S";
+const char data_format[] = "%Y-%m-%d";
 int display_info(const char *fpath, const struct stat *sb,
              int tflag, struct FTW *ftwbuf);
 
 static int system_func_flag;
+static char operand;
+static struct tm *user_date;
 
+void print_file_info(const char *, const struct stat *);
 void printHelp(char *);
+char* file_access_right(const struct stat *);
+int date_compare(struct tm*);
 
 int main (int argc, char **argv){
 
@@ -39,20 +44,12 @@ int main (int argc, char **argv){
         err_ret("Ilegal first argument");
 
     char *path = argv[2];
-    char *operant = argv[3];
-    char *usr_date = argv[4];
+    operand = argv[3][0];
 
-    struct tm *tm = malloc(sizeof(struct tm));
+    user_date = malloc(sizeof(struct tm));
 
-    int const buff_size = PATH_MAX;
-    char buffer[buff_size];
-
-    strptime(usr_date, data_format, tm);
-    strftime(buffer, buff_size, data_format, tm);
-    time_t date = mktime(tm);
-
-
-
+    strptime(argv[4], data_format, user_date);
+   
     if (nftw(realpath(path, NULL), display_info, 20, FTW_PHYS) == -1) {
         err_sys_exit("nftw");
     }
@@ -61,25 +58,73 @@ int main (int argc, char **argv){
     return EXIT_SUCCESS;
 }
 
-int display_info(const char *fpath, const struct stat *sb,
-             int tflag, struct FTW *ftwbuf){
+int display_info(const char *fpath, const struct stat *file_stat, int tflag, struct FTW *ftwbuf){
 
-
-    char buff[20]; 
     struct tm timeinfo;
+    if(localtime_r(&file_stat->st_mtime,&timeinfo)==NULL)
+        err_sys_exit("Can't convert file stat to tm struct");
 
-    (void) localtime_r(&sb->st_mtime, &timeinfo);
+    if((tflag == FTW_D || tflag == FTW_F) && date_compare(&timeinfo))
+        print_file_info(fpath,file_stat);
 
+    return 0;           /* To tell nftw() to continue */
+}
+
+void print_file_info(const char *path, const struct stat *file_stat){
+    char buff[20]; 
+
+    struct tm timeinfo;
+    if(localtime_r(&file_stat->st_mtime, &timeinfo)==NULL)
+        err_sys_exit("Can't convert file stat to tm struct");
     strftime(buff, 20, data_format, &timeinfo); 
 
+    printf("%10s %-7jd %s  %s\n",
+        file_access_right(file_stat),
+        (intmax_t) file_stat->st_size,
+        buff,
+        path);
+}
 
+int date_compare(struct tm *date) {
 
-    if(tflag == FTW_D || tflag == FTW_F)
-    printf("%-80s %-7jd %s\n",
-        fpath,
-        (intmax_t) sb->st_size,
-        buff);
-    return 0;           /* To tell nftw() to continue */
+    switch (operand){
+        case '=':
+            return user_date->tm_year == date->tm_year
+                && user_date->tm_mon == date->tm_mon 
+                && user_date->tm_mday == date->tm_mday;
+        break;
+        case '>':
+            return user_date->tm_year < date->tm_year ||
+                (user_date->tm_year == date->tm_year && user_date->tm_mon < date->tm_mon) ||
+                (user_date->tm_year == date->tm_year && user_date->tm_mon == date->tm_mon && user_date->tm_mday < date->tm_mday);
+        break;
+        case '<':
+            return user_date->tm_year > date->tm_year ||
+                (user_date->tm_year == date->tm_year && user_date->tm_mon > date->tm_mon) ||
+                (user_date->tm_year == date->tm_year && user_date->tm_mon == date->tm_mon && user_date->tm_mday > date->tm_mday);
+               break;
+        default:
+            err_exit("Not suported operation.");
+        
+    }
+    
+    return 1;
+}
+
+char* file_access_right(const struct stat *file_stat){
+    char* access_rights=calloc(10,sizeof(char));
+    access_rights[0]=file_stat->st_mode & S_IRUSR ? 'r' : '-';
+    access_rights[1]=file_stat->st_mode & S_IWUSR ? 'w' : '-';
+    access_rights[2]=file_stat->st_mode & S_IXUSR ? 'x' : '-';
+    access_rights[3]=file_stat->st_mode & S_IRGRP ? 'r' : '-';
+    access_rights[4]=file_stat->st_mode & S_IWGRP ? 'w' : '-';
+    access_rights[5]=file_stat->st_mode & S_IXGRP ? 'x' : '-';
+    access_rights[6]=file_stat->st_mode & S_IROTH ? 'r' : '-';
+    access_rights[7]=file_stat->st_mode & S_IWOTH ? 'w' : '-';
+    access_rights[8]=file_stat->st_mode & S_IXOTH ? 'x' : '-';
+    access_rights[9]='\0';
+
+    return access_rights;
 }
 
 void printHelp(char *progName){
