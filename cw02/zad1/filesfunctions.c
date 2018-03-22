@@ -157,7 +157,8 @@ void generate_file(){
             err_sys_exit("Can't write to file");
         free(buf);
     }
-    close(file_descriptor);
+    if(close(file_descriptor)!=0)
+        err_sys_exit("Can't close file");
 }
 
 void copy_sys_file(){
@@ -184,8 +185,10 @@ void copy_sys_file(){
         err_sys_exit("Can't read file");
 
     free(buf);
-    close(file_source);
-    close(file_copy);
+    if(close(file_source)!=0)
+        err_sys_exit("Can't close source file");
+    if(close(file_copy)!=0)
+        err_sys_exit("Can't close copy file");
 }
 
 void sort_sys_file(){
@@ -231,7 +234,8 @@ void sort_sys_file(){
 
     free(insert_buf);
     free(swap_buf);
-    close(file_descriptor);
+    if(close(file_descriptor)!=0)
+        err_sys_exit("Can't close file");
 }
 
 void copy_lib_file(){
@@ -256,8 +260,10 @@ void copy_lib_file(){
         err_sys_exit("Can't read file");
     
     free(buf);
-    fclose(file_source);
-    fclose(file_copy);
+    if(fclose(file_source)!=0)
+        err_sys_exit("Can't close source file");
+    if(fclose(file_copy)!=0)
+        err_sys_exit("Can't close copy file");
 }
 
 void sort_lib_file(){
@@ -305,7 +311,8 @@ void sort_lib_file(){
 
     free(insert_buf);
     free(swap_buf);
-    fclose(file_source);
+    if(fclose(file_source)!=0)
+        err_sys_exit("Can't close file");
 }
 
 

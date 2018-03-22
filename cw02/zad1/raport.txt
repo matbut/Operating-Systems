@@ -1,0 +1,63 @@
+Funkcje systemowe są ciut szybsze od funkcji bibliotecznych, ale ta różnica nie jest tak duża jak się spodziewałem.
+Koszt operacji zczytywania jest na tyle wysoki, że nie ma dużego znaczenia czy rekordy są 4 bajtowe, czy 512, czy nawet 4096 bajtowe.
+Dopiero korzystanie z 8192 bajtowych rekordów spowodowało podwojenie czasu sortowania.
+
+ 6400 records with 4  length 
+
+---- Copy file with library functions----
+   Real      User      System
+0.010000   0.000000   0.000000 
+---- Sort file with library functions----
+   Real      User      System
+22.700000   5.070000   17.610000 
+---- Copy file with system functions----
+   Real      User      System
+0.020000   0.000000   0.000000 
+---- Sort file with system functions----
+   Real      User      System
+18.240000   3.110000   15.110000 
+
+ 6400 records with 512 length 
+
+---- Copy file with library functions----
+   Real      User      System
+0.010000   0.000000   0.000000 
+---- Sort file with library functions----
+   Real      User      System
+22.970000   5.110000   17.840000 
+---- Copy file with system functions----
+   Real      User      System
+0.020000   0.000000   0.010000 
+---- Sort file with system functions----
+   Real      User      System
+18.530000   3.100000   15.410000 
+
+ 6400 records with 4096 length 
+
+---- Copy file with library functions----
+   Real      User      System
+0.030000   0.000000   0.020000 
+---- Sort file with library functions----
+   Real      User      System
+24.870000   4.130000   20.730000 
+---- Copy file with system functions----
+   Real      User      System
+0.030000   0.000000   0.020000 
+---- Sort file with system functions----
+   Real      User      System
+24.140000   3.120000   21.010000 
+
+ 6400 records with 8192 length 
+
+---- Copy file with library functions----
+   Real      User      System
+0.150000   0.000000   0.140000 
+---- Sort file with library functions----
+   Real      User      System
+39.850000   3.990000   35.850000 
+---- Copy file with system functions----
+   Real      User      System
+0.050000   0.000000   0.040000 
+---- Sort file with system functions----
+   Real      User      System
+39.040000   3.150000   35.870000 
