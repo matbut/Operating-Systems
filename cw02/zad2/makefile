@@ -13,3 +13,11 @@ $(PROGNAME): $(PROGNAME).c
 
 clean:
 	-rm -rf *.o $(PROGNAME)
+
+test: $(PROGNAME)
+	./$(PROGNAME) ../ "<" 2018-03-21 --sys
+	./$(PROGNAME) ../ ">" 2018-03-21 --sys
+	./$(PROGNAME) ../ "=" 2018-03-21 --sys
+	./$(PROGNAME) ../ "<" 2018-03-21 --lib
+	./$(PROGNAME) ../ ">" 2018-03-21 --lib
+	./$(PROGNAME) ../ "=" 2018-03-21 --lib

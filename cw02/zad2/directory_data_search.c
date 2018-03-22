@@ -13,19 +13,18 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <stdint.h>
+#include <dirent.h>
 
 const char data_format[] = "%Y-%m-%d";
-int display_info(const char *fpath, const struct stat *sb,
-             int tflag, struct FTW *ftwbuf);
-
-static int system_func_flag;
 static char operand;
 static struct tm *user_date;
 
+int display_info(const char *, const struct stat *,int , struct FTW *);
 void print_file_info(const char *, const struct stat *);
 void printHelp(char *);
 char* file_access_right(const struct stat *);
 int date_compare(struct tm*);
+int display_dir_sys(char * );
 
 int main (int argc, char **argv){
 
@@ -35,39 +34,68 @@ int main (int argc, char **argv){
         return EXIT_FAILURE;
     }
 
-
-    if(strcmp(argv[1],"--lib"))
-        system_func_flag=1;
-    else if(strcmp(argv[1],"--sys"))
-        system_func_flag=0;
-    else
-        err_ret("Ilegal first argument");
-
-    char *path = argv[2];
-    operand = argv[3][0];
+    char *path = argv[1];
+    operand = argv[2][0];
 
     user_date = malloc(sizeof(struct tm));
 
-    strptime(argv[4], data_format, user_date);
+    if(strptime(argv[3], data_format, user_date)==NULL)
+        err_exit("Ilegal data format in argument: %s",argv[3]);
    
-    if (nftw(realpath(path, NULL), display_info, 20, FTW_PHYS) == -1) {
-        err_sys_exit("nftw");
-    }
-
+    if(strcmp(argv[4],"--lib")){
+        if (nftw(realpath(path, NULL), display_info, 20, FTW_PHYS) == -1) 
+            err_sys_exit("nftw");        
+    }else if(strcmp(argv[1],"--sys"))
+        display_dir_sys(realpath(path, NULL));
+    else
+        err_exit("Ilegal argument: %s",argv[4]);
 
     return EXIT_SUCCESS;
 }
 
+int display_dir_sys(char * path){
+
+    DIR *dp;
+    struct dirent *dirp;
+    struct stat file_stat;
+    char new_path[PATH_MAX];
+
+    dp=opendir(path);
+    if(dp==NULL)
+        err_sys_exit("Can't open %s",path);
+
+    dirp=readdir(dp);
+
+    while (dirp != NULL) {
+        strcpy(new_path, path);
+        strcat(new_path, "/");
+        strcat(new_path, dirp->d_name);
+
+        lstat(new_path, &file_stat);
+        
+        if (S_ISREG(file_stat.st_mode)) 
+            print_file_info(new_path,&file_stat);
+        else if (S_ISDIR(file_stat.st_mode)){
+            if (strcmp(dirp->d_name, ".") == 0 || strcmp(dirp->d_name, "..") == 0) {
+                dirp = readdir(dp);
+                continue;
+            }
+            display_dir_sys(new_path);
+        }    
+        dirp = readdir(dp);
+    }
+
+    if(closedir(dp)!=0)
+        err_sys_exit("Can't close dir");
+
+    return 0;
+}
+
 int display_info(const char *fpath, const struct stat *file_stat, int tflag, struct FTW *ftwbuf){
 
-    struct tm timeinfo;
-    if(localtime_r(&file_stat->st_mtime,&timeinfo)==NULL)
-        err_sys_exit("Can't convert file stat to tm struct");
-
-    if((tflag == FTW_D || tflag == FTW_F) && date_compare(&timeinfo))
+    if(tflag == FTW_F)
         print_file_info(fpath,file_stat);
-
-    return 0;           /* To tell nftw() to continue */
+    return 0;           
 }
 
 void print_file_info(const char *path, const struct stat *file_stat){
@@ -78,11 +106,13 @@ void print_file_info(const char *path, const struct stat *file_stat){
         err_sys_exit("Can't convert file stat to tm struct");
     strftime(buff, 20, data_format, &timeinfo); 
 
-    printf("%10s %-7jd %s  %s\n",
-        file_access_right(file_stat),
-        (intmax_t) file_stat->st_size,
-        buff,
-        path);
+    if(date_compare(&timeinfo)){
+        printf("%10s %-7jd %s  %s\n",
+            file_access_right(file_stat),
+            (intmax_t) file_stat->st_size,
+            buff,
+            path);
+    } 
 }
 
 int date_compare(struct tm *date) {
@@ -104,7 +134,7 @@ int date_compare(struct tm *date) {
                 (user_date->tm_year == date->tm_year && user_date->tm_mon == date->tm_mon && user_date->tm_mday > date->tm_mday);
                break;
         default:
-            err_exit("Not suported operation.");
+            err_exit("Not suported %c operation.",operand);
         
     }
     
@@ -129,5 +159,5 @@ char* file_access_right(const struct stat *file_stat){
 
 void printHelp(char *progName){
   printf("Usage help\n");
-  printf("%s [--lib or --sys] <path> <operator> <date %s format> \n",progName,data_format);
+  printf("%s <path> <operator> <date %s format> [--lib or --sys] \n",progName,data_format);
 }
