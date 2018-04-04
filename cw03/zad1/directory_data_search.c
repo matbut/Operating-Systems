@@ -1,6 +1,5 @@
 #define _XOPEN_SOURCE 500
 #include <ftw.h>
-#include "./../../errorlib/errorlib.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/times.h>
@@ -29,7 +28,7 @@ int display_dir_sys(char * );
 int main (int argc, char **argv){
 
     if (argc!=4) {
-        err_ret("Ilegal arguments number");
+        printf("Ilegal arguments number");
         printHelp(argv[0]);
         return EXIT_FAILURE;
     }
@@ -39,10 +38,11 @@ int main (int argc, char **argv){
 
     user_date = malloc(sizeof(struct tm));
 
-    if(strptime(argv[3], data_format, user_date)==NULL)
-        err_exit("Ilegal data format in argument: %s",argv[3]);
-   
-  
+    if(strptime(argv[3], data_format, user_date)==NULL){
+        printf("Ilegal data format in argument: %s",argv[3]);
+        exit(EXIT_FAILURE);
+    }
+        
     display_dir_sys(realpath(path, NULL));
 
     return EXIT_SUCCESS;
@@ -56,8 +56,11 @@ int display_dir_sys(char * path){
     char new_path[PATH_MAX];
 
     dp=opendir(path);
-    if(dp==NULL)
-        err_sys_exit("Can't open %s",path);
+    if(dp==NULL){
+        perror(path);
+        exit(EXIT_FAILURE);
+    }
+
 
     dirp=readdir(dp);
 
@@ -77,8 +80,10 @@ int display_dir_sys(char * path){
             }
             pid_t pid=fork();
             
-            if(pid<0)
-                err_sys_exit("Fork error");
+            if(pid<0){
+                perror("new process failed");
+                exit(EXIT_FAILURE);
+            }
             else if (pid==0){
                 display_dir_sys(new_path);
                 exit(0);
@@ -87,9 +92,10 @@ int display_dir_sys(char * path){
         dirp = readdir(dp);
     }
 
-    if(closedir(dp)!=0)
-        err_sys_exit("Can't close dir");
-
+    if(closedir(dp)!=0){
+        perror("Can't close dir");
+        exit(EXIT_FAILURE);
+    }
     return 0;
 }
 
@@ -97,8 +103,10 @@ void print_file_info(const char *path, const struct stat *file_stat){
     char buff[20]; 
 
     struct tm timeinfo;
-    if(localtime_r(&file_stat->st_mtime, &timeinfo)==NULL)
-        err_sys_exit("Can't convert file stat to tm struct");
+    if(localtime_r(&file_stat->st_mtime, &timeinfo)==NULL){
+        perror("Can't convert file stat to tm struct");
+        exit(EXIT_FAILURE);    
+    }
     strftime(buff, 20, data_format, &timeinfo); 
 
     if(date_compare(&timeinfo)){
@@ -129,10 +137,9 @@ int date_compare(struct tm *date) {
                 (user_date->tm_year == date->tm_year && user_date->tm_mon == date->tm_mon && user_date->tm_mday > date->tm_mday);
                break;
         default:
-            err_exit("Not suported %c operation.",operand);
-        
+            printf("Not suported %c operation.",operand);     
+            exit(EXIT_FAILURE);  
     }
-    
     return 1;
 }
 
