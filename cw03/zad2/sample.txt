@@ -1,0 +1,4 @@
+echo ala
+ls -a -l
+pwd
+sleep 1s

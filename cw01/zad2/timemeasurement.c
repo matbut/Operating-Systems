@@ -295,7 +295,7 @@ void printTable(){
 
 }
 
-char *generate_data(int dataSize) {
+{char *generate_data(int dataSize) 
 	const char* dataTemplate[DATATEMPLATESIZE] = {
 		"lectus justo eu arcu. Morbi",
 		"vitae velit egestas lacinia. Sed congue, elit sed consequat auctor, nunc nulla vulputate dui, nec tempus",
