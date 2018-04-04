@@ -76,12 +76,11 @@ int display_dir_sys(char * path){
                 continue;
             }
             pid_t pid=fork();
-            //printf("new process %d\n",pid);
+            
             if(pid<0)
                 err_sys_exit("Fork error");
-            else if (pid>0){
+            else if (pid==0){
                 display_dir_sys(new_path);
-                //printf("end process %d\n",pid);
                 exit(0);
             }
         }    
