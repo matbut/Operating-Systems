@@ -1,0 +1,5 @@
+echo ala
+ls -a -l
+pwd
+./cpu_destroyer
+echo koniec

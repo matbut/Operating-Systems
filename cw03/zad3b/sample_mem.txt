@@ -1,5 +1,5 @@
 echo ala
 ls -a -l
 pwd
-./cpu_destroyer
 ./memory_destroyer
+echo koniec

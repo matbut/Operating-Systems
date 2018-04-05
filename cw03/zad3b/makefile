@@ -4,7 +4,8 @@ CPPFLAGS=
 PROGNAME=batch_processing
 CPU_DESTROYER=cpu_destroyer
 MEM_DESTROYER=memory_destroyer
-FILE=sample.txt
+FILE_CPU=sample_cpu.txt
+FILE_MEM=sample_mem.txt
 PROGPATH=./../zad3a/
 
 all: cpu mem $(PROGNAME)
@@ -19,8 +20,8 @@ mem: $(MEM_DESTROYER).c
 	$(CC) $(CFLAGS) $(CPPFLAGS) $^ -o $(MEM_DESTROYER)
 
 test: all
-	./$(PROGNAME) $(FILE) 10 20
-	./$(PROGNAME) $(FILE) 2 200
+	./$(PROGNAME) $(FILE_MEM) 10 20
+	./$(PROGNAME) $(FILE_CPU) 2 200
 	
 
 .PHONY: clean

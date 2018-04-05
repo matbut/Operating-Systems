@@ -11,7 +11,7 @@
 #define MAX_ARGS_NUM 10
 
 void printHelp(char *);
-void print_usage(struct rusage);
+void print_usage(char*,struct rusage);
 
 struct rlimit cpu_time_limit;
 struct rlimit memory_limit;
@@ -81,10 +81,10 @@ int main (int argc, char **argv){
         }else{
             int status;
             if (wait3(&status,0,&usage) < 0){
-				perror(line);
+				perror("");
 				exit(EXIT_FAILURE);
             }
-            print_usage(usage);
+            print_usage(words[0],usage);
             if (WEXITSTATUS(status)){
                 exit(EXIT_FAILURE);
             }
@@ -103,14 +103,15 @@ int main (int argc, char **argv){
 }
 
 
-void print_usage(struct rusage usage)
+void print_usage(char*command,struct rusage usage)
 {
-	printf("+--------------------------+\n");
-	printf("| System time:%4ld.%06ld s |\n", \
+	printf("+----------------------------+\n");
+    printf("| Command %18s |\n",command);
+	printf("| System time:%5ld.%06ld s |\n", \
 		usage.ru_stime.tv_sec,usage.ru_stime.tv_usec);
-	printf("| User time:  %4ld.%06ld s |\n" , \
+	printf("| User time:  %5ld.%06ld s |\n" , \
 		usage.ru_utime.tv_sec,usage.ru_utime.tv_usec);
-    printf("+--------------------------+\n");
+    printf("+----------------------------+\n");
 
 }
 
