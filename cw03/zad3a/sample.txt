@@ -1,0 +1,3 @@
+echo ala
+ls -a -l
+pwd

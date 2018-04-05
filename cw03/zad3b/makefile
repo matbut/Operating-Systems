@@ -5,10 +5,11 @@ PROGNAME=batch_processing
 CPU_DESTROYER=cpu_destroyer
 MEM_DESTROYER=memory_destroyer
 FILE=sample.txt
+PROGPATH=./../zad3a/
 
 all: cpu mem $(PROGNAME)
 
-$(PROGNAME): $(PROGNAME).c 
+$(PROGNAME): $(PROGPATH)$(PROGNAME).c 
 	$(CC) $(CFLAGS) $(CPPFLAGS) $^ -o $@
 
 cpu: $(CPU_DESTROYER).c 
