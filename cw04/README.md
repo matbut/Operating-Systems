@@ -29,7 +29,7 @@ wysłanych pozwoleń na wysłanie sygnału rzeczywistego
 otrzymanych sygnałów czasu rzeczywistego(wraz z numerem sygnału)
 zakończenia procesu potomnego (wraz ze zwróconą wartością)
 
-###Zadanie 3 (40%)
+### Zadanie 3 (40%)
 
 Napisz program który tworzy proces potomny i wysyła do niego L sygnałów SIGUSR1, a następnie sygnał zakończenia wysyłania SIGUSR2. Potomek po otrzymaniu sygnałów SIGUSR1 od rodzica zaczyna je odsyłać do procesu macierzystego, a po otrzymaniu SIGUSR2 kończy pracę.
 
