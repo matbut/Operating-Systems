@@ -42,7 +42,7 @@ void sigint_handler(int sig_no) {
 
 
     if(kill(child_pid,0) >= 0){
-        kill(child_pid,9);
+        kill(child_pid,SIGKILL);
         int st;
         
 		if(waitpid(child_pid, &st, 0)<0){
