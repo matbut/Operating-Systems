@@ -2,13 +2,17 @@
 
 Rodzaje sygnałów: SIGINT, SIGQUIT, SIGKILL, SIGTSTP, SIGSTOP, SIGTERM, SIGSEGV, SIGHUP, SIGALARM, SIGCHLD, SIGUSR1, SIGUSR2
 Sygnały czasu rzeczywistego: SIGRTMIN, SIGRTMIN+n, SIGRTMAX
+
 Przydatne polecenia Unix: kill, ps
+
 Przydatne funkcje systemowe: kill, raise, sigqueue, signal, sigaction, sigemptyset, sigfillset, sigaddset, sigdelset, sigismember, sigprocmask, sigpending, pause, sigsuspend
 
 ### Zadanie 1 (25%)
 
 Napisz program wypisujący w pętli nieskończonej aktualną godzinę Po odebraniu sygnału SIGTSTP (CTRL+Z) program zatrzymuje się, wypisując komunikat "Oczekuję na CTRL+Z - kontynuacja albo CTR+C - zakonczenie programu". Po ponownym wysłaniu SIGTSTP program powraca do pierwotnego wypisywania.
+
 Program powinien również obsługiwać sygnał SIGINT. Po jego odebraniu program wypisuje komunikat "Odebrano sygnał SIGINT" i kończy działanie. W kodzie programu, do przechwycenia sygnałów użyj zarówno funkcji signal, jak i sigaction (np. SIGINT odbierz za pomocą signal, a SIGTSTP za pomocą sigaction).
+
 Zrealizuj powyższe zadanie, tworząc program potomny, który będzie wywoływał jedną z funkcji z rodziny exec skrypt shellowy zawierający zapętlone systemowe polecenie date. Proces macierzysty będzie przychwytywał powyższe sygnały i przekazywał je do procesu potomnego, tj po otrzymaniu SIGTSTP kończy proces potomka, a jeśli ten został wcześniej zakończony, tworzy nowy, wznawiając działanie skryptu, a po otrzymaniu SIGINT kończy działanie potomka (jeśli ten jeszcze pracuje) oraz programu.
 
 ### Zadanie 2 (35%)
@@ -23,11 +27,11 @@ Zachowanie dzieci powinno być następujące: Każde dziecko najpierw symuluje p
 
 Program główny powinien mieć możliwość śledzenia informacji na temat: (dla czytelności w łatwy sposób powinno dać się je grupami włączyć i wyłączyć)
 
-tworzenia procesu potomnego (jego nr PID),
-otrzymanych próśb od procesów potomnych,
-wysłanych pozwoleń na wysłanie sygnału rzeczywistego
-otrzymanych sygnałów czasu rzeczywistego(wraz z numerem sygnału)
-zakończenia procesu potomnego (wraz ze zwróconą wartością)
+- tworzenia procesu potomnego (jego nr PID),
+- otrzymanych próśb od procesów potomnych,
+- wysłanych pozwoleń na wysłanie sygnału rzeczywistego
+- otrzymanych sygnałów czasu rzeczywistego(wraz z numerem sygnału)
+- zakończenia procesu potomnego (wraz ze zwróconą wartością)
 
 ### Zadanie 3 (40%)
 
@@ -35,14 +39,18 @@ Napisz program który tworzy proces potomny i wysyła do niego L sygnałów SIGU
 
 Proces macierzysty w zależności od argumentu Type (1,2,3) programu wysyła sygnały na trzy różne sposoby:
 
-SIGUSR1, SIGUSR2 za pomocą funkcji kill (15%)
-SIGUSR1, SIGUSR2 za pomocą funkcji kill, z tym, że proces macierzysty wysyła kolejny sygnał dopiero po otrzymaniu potwierdzenia odebrania poprzedniego (15%)
-wybrane 2 sygnały czasu rzeczywistego za pomocą kill (10%)
+- SIGUSR1, SIGUSR2 za pomocą funkcji kill (15%)
+
+- SIGUSR1, SIGUSR2 za pomocą funkcji kill, z tym, że proces macierzysty wysyła kolejny sygnał dopiero po otrzymaniu potwierdzenia odebrania poprzedniego (15%)
+
+- wybrane 2 sygnały czasu rzeczywistego za pomocą kill (10%)
+
 Program powinien wypisywać informacje o:
 
-liczbie wysłanych sygnałów do potomka
-liczbie odebranych sygnałów przez potomka
-liczbie odebranych sygnałów od potomka
+- liczbie wysłanych sygnałów do potomka
+- liczbie odebranych sygnałów przez potomka
+- liczbie odebranych sygnałów od potomka
+
 Program kończy działanie po zakończeniu pracy potomka albo po otrzymaniu sygnału SIGINT (w tym wypadku od razu wysyła do potomka sygnał SIGUSR2, aby ten zakończył pracę. Wszystkie pozostałe sygnały są blokowane w procesie potomnym).
 
 L i Type są argumentami programu.
