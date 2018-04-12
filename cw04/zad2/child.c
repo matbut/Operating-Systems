@@ -25,7 +25,7 @@ int main() {
     //zablokowanie wszystkich sygnalow
 
     int sleep_time = 1+(rand() % 10);
-    //printf("Child PID %d: I am sleeping: %ds\n", getpid(), sleep_time);
+    printf("Child PID %d: I am sleeping: %ds\n", getpid(), sleep_time);
     sleep((unsigned int) sleep_time);
     kill(getppid(), SIGUSR1);
 
