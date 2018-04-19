@@ -1,4 +1,4 @@
-echo ala
-ls -a -l
-pwd
-sleep 1s
+pwd | grep home
+ls -a -l | grep sample.txt | grep mateusz
+ls -a | grep sample.txt
+echo "ala ma psa" | grep ala | grep ma | grep psa
