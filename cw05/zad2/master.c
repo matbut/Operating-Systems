@@ -19,16 +19,16 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    FILE *pipe = fopen(argv[1], "r");
-    if (pipe == NULL) {
-        perror("Pipe open error");
+    FILE *fifo = fopen(argv[1], "r");
+    if (fifo == NULL) {
+        perror("Fifo open error");
         exit(EXIT_FAILURE);
     }
     char buff[PIPE_BUF];
-    while(fgets(buff, PIPE_BUF, pipe) != NULL){
+    while(fgets(buff, PIPE_BUF, fifo) != NULL){
         printf("Master received: %s", buff);
     }
-    fclose(pipe);
+    fclose(fifo);
 
     return 0;
 }
