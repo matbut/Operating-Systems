@@ -40,9 +40,7 @@ int main (int argc, char **argv){
 
     int args_num;
     int commands_num;
-
     char *word;
-  
 
     while(getline(&line, &length, file) != -1){
         args_num = 0;
@@ -59,15 +57,12 @@ int main (int argc, char **argv){
             perror("to many arguments");
             exit(EXIT_FAILURE);
         }
-        //printf("Command\n");
         for(int i=0;i<args_num;i++){
             commands_num=0;
-            //printf("  Word\n");
             word = strtok(lines[i]," ");
             while(word != NULL && commands_num<MAX_PIPES_NUM){
                 commands[i][commands_num]=word;
                 commands_num++;
-                //printf("    Part : %s\n",word);
                 word = strtok (NULL, " ");
             } 
             commands[i][commands_num]=NULL;
@@ -92,7 +87,6 @@ int main (int argc, char **argv){
                 perror("new process failed");
                 exit(EXIT_FAILURE);
             }else if (pid==0){
-
                 if (i > 0){
                     close(pipefd[(i+1)%2][1]);
                     if (dup2(pipefd[(i+1)%2][0], STDIN_FILENO) < 0){
@@ -105,9 +99,7 @@ int main (int argc, char **argv){
                         perror("out dup2 error");
                         exit(EXIT_FAILURE);
                     }
-                }
-
-                if(execvp(commands[i][0],commands[i])==-1){
+                }if(execvp(commands[i][0],commands[i])==-1){
                     printf ("process %s failed: %s\n",commands[i][0], strerror(errno));
                     exit(EXIT_FAILURE);
                 }
@@ -119,11 +111,9 @@ int main (int argc, char **argv){
             }
         }
 
-        while (wait(NULL)) {
-            if (errno == ECHILD) {
+        while (wait(NULL)) 
+            if (errno == ECHILD) 
                 break;
-            }
-        }
     }
 
     if(fclose(file)!=0){
