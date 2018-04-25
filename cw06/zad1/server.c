@@ -18,6 +18,7 @@ pid_t clients_pid[CLIENTS_MAX_NUM];
 int clients_mqid[CLIENTS_MAX_NUM]; // message queue identifiers
 int clients_num=0;
 
+int end_flag=0;
 
 int get_client_mqid(pid_t pid){
     for(int i=0;i<clients_num;i++){
@@ -131,7 +132,7 @@ void process_time(pid_t pid,char *buffer){
 }
 
 void process_end(pid_t pid,char *buffer){
-
+    end_flag=1;
 }
 
 void process_init(pid_t pid,char *buffer){
@@ -142,7 +143,16 @@ void receive(){
 
     struct message message;
 
-    if (msgrcv (qid, &message, sizeof (struct message_text), 0, 0) == -1) {
+    int msgflg=0;
+    if(end_flag){
+        msgflg=IPC_NOWAIT;
+    }
+
+    if (msgrcv (qid, &message, sizeof (struct message_text), 0, msgflg) == -1) {
+        if(end_flag){
+            printf("Server ends...");
+            exit (EXIT_SUCCESS); //no bo skonczyly sie wiadomosci, a jest flaga IPC_NOWAIT
+        }
         perror ("server msgrcv error");
         exit (EXIT_FAILURE);
     }

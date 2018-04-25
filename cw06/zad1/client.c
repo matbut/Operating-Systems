@@ -79,9 +79,6 @@ int read_message_type(){
         if(strcmp(buffer, "end") == 0)
             return END;
 
-        if(strcmp(buffer, "q") == 0){
-            exit(0);
-        }
         printf("Illegal message type\n");
     }
 }
@@ -139,13 +136,17 @@ int main (int argc, char **argv){
 
         int type=read_message_type();
         strcpy(buffer,"");
+
         if(type == MIRROR || type == CALC)
             read_message(buffer);
-        send_message(type,buffer);
-        receive_message();
 
+        send_message(type,buffer);
+
+        if(type == END)
+            exit (EXIT_SUCCESS);
+
+        receive_message();
     }
-    exit (EXIT_SUCCESS);
 }
 
 
