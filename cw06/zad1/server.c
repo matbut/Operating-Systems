@@ -1,4 +1,5 @@
 # define _GNU_SOURCE
+#include <time.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -46,7 +47,7 @@ void response(pid_t pid,int type,char* format,...){
 
     int client_mqid = get_client_mqid(pid);
     
-    printf("Server %d[%d] sends %s to %d[%d] client\n",getpid(),qid,message.message_text.buf,(int) pid,client_mqid);
+    printf("Server sends %s to client %d\n",message.message_text.buf,(int) pid);
 
     // send message to server
     if (msgsnd (client_mqid, &message, sizeof (struct message_text), 0) == -1) {
@@ -91,10 +92,42 @@ void process_mirror(pid_t pid,char *buffer){
 
 void process_calc(pid_t pid,char *buffer){
 
+    int a,b;
+    char operation;
+
+    if(sscanf(buffer, "%d %c %d", &a,&operation,&b) < 0){
+        perror("can't scanf calculator expresion");
+        exit (EXIT_FAILURE);
+    } 
+
+    switch(operation){
+        case '+':
+            a=a+b;
+            break;
+        case '-':
+            a=a-b;
+            break;
+        case '*':
+            a=a*b;
+            break;
+        case '/':
+            a=a/b;
+            break;                              
+        default:
+            perror("illegal calculator operation");
+            exit (EXIT_FAILURE);
+    }
+    response(pid,REGISTER,"%d",a);
 }
 
 void process_time(pid_t pid,char *buffer){
+    time_t rawtime;
+    struct tm * timeinfo;
 
+    time ( &rawtime );
+    timeinfo = localtime ( &rawtime );
+
+    response(pid,TIME,"%s",asctime (timeinfo));
 }
 
 void process_end(pid_t pid,char *buffer){
@@ -114,8 +147,7 @@ void receive(){
         exit (EXIT_FAILURE);
     }
 
-    printf("SERVER receives:\n");
-    printf("%s\n", message.message_text.buf);
+    printf("Server receives %s from client %d\n",message.message_text.buf,message.message_text.pid);
 
     switch (message.message_type){
         case REGISTER:
@@ -166,8 +198,7 @@ int main (int argc, char **argv){
         exit (EXIT_FAILURE);
     }
 
-    printf("Message Queue ID: %d\n", msg_queue_key);
-    printf("Server ID: %ld\n", (long)getpid());
+    printf("Server %d\n", getpid());
 
     while (1) {
         // read an incoming message

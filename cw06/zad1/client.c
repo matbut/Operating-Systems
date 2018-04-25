@@ -14,6 +14,7 @@ int server_mqid,my_mqid;
 
 void send_message(int type,char* format,...){
 
+
     struct message message;
     message.message_text.pid=getpid();
     message.message_type=type;
@@ -22,7 +23,7 @@ void send_message(int type,char* format,...){
     va_start(ap,format);
     vsprintf(message.message_text.buf,format,ap);
     
-    printf("Client %d[%d] sends %s to [%d] server\n",(int)getpid(),my_mqid,message.message_text.buf,server_mqid);
+    printf("Client %d sends %s to server\n",(int)getpid(),message.message_text.buf);
     // send message to server
     if (msgsnd (server_mqid, &message, sizeof (struct message_text), 0) == -1) {
         perror ("client msgsnd error");
@@ -48,7 +49,53 @@ void receive_message(){
     }
 
     // process return message from server
-    printf ("Message received from server: %s\n\n", message.message_text.buf);  
+    printf ("Client %d received %s from server\n\n",getpid(),message.message_text.buf);  
+}
+
+int read_message_type(){
+    char buffer[BUFFER_SIZE];
+
+    while(1){
+        printf ("Please type a message type: ");
+        if(fgets (buffer, BUFFER_SIZE-2, stdin) == NULL){
+            perror("Server fgets error");
+            exit (EXIT_FAILURE);
+        }
+
+        int length = strlen (buffer);
+        if (buffer[length-1] == '\n')
+            buffer[length-1] = '\0';
+
+
+        if(strcmp(buffer, "mirror") == 0)
+            return MIRROR;
+        
+        if(strcmp(buffer, "calc") == 0)
+            return CALC;
+        
+        if(strcmp(buffer, "time") == 0)
+            return TIME;
+
+        if(strcmp(buffer, "end") == 0)
+            return END;
+
+        if(strcmp(buffer, "q") == 0){
+            exit(0);
+        }
+        printf("Illegal message type\n");
+    }
+}
+
+void read_message(char*buffer){
+    printf ("Please type a message: ");
+    if(fgets (buffer, BUFFER_SIZE-2, stdin) == NULL){
+        perror("Server fgets error");
+        exit (EXIT_FAILURE);
+    }
+
+    int length = strlen (buffer);
+    if (buffer[length-1] == '\n')
+        buffer[length-1] = '\0';
 }
 
 int main (int argc, char **argv){
@@ -82,24 +129,22 @@ int main (int argc, char **argv){
         exit (EXIT_FAILURE);
     }
 
+    printf("Client %d\n", getpid());
+
     send_message(REGISTER,"%d",my_mqid);
     receive_message();
 
-
-    printf ("Please type a message: ");
     char buffer[BUFFER_SIZE];
-    while (fgets (buffer, BUFFER_SIZE-2, stdin)) {
-        // remove newline from string
-        int length = strlen (buffer);
-        if (buffer[length-1] == '\n')
-           buffer[length-1] = '\0';
+    while (1) {
 
-        send_message(MIRROR,buffer);
+        int type=read_message_type();
+        strcpy(buffer,"");
+        if(type == MIRROR || type == CALC)
+            read_message(buffer);
+        send_message(type,buffer);
         receive_message();
 
-        printf ("Please type a message: ");
     }
-
     exit (EXIT_SUCCESS);
 }
 
