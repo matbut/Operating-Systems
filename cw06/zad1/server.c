@@ -10,6 +10,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <signal.h>
 #include "message.h"
 
 int qid;
@@ -30,6 +31,9 @@ int get_client_mqid(pid_t pid){
 }
 
 void remove_queue(void){
+
+    printf("Server removes queue\n");
+
     if (msgctl (qid, IPC_RMID, NULL) == -1) {
         perror ("server msgctl error");
         exit (EXIT_FAILURE);
@@ -48,7 +52,7 @@ void response(pid_t pid,int type,char* format,...){
 
     int client_mqid = get_client_mqid(pid);
     
-    printf("Server sends %s to client %d\n",message.message_text.buf,(int) pid);
+    printf("Server sends %s \"%s\" to client %d\n",TO_STRING(message.message_type),message.message_text.buf,(int) pid);
 
     // send message to server
     if (msgsnd (client_mqid, &message, sizeof (struct message_text), 0) == -1) {
@@ -135,8 +139,22 @@ void process_end(pid_t pid,char *buffer){
     end_flag=1;
 }
 
-void process_init(pid_t pid,char *buffer){
+void remove_client_mqid(pid_t pid){
+    for(int i=0;i<clients_num;i++){
+        if(clients_pid[i]==pid){
+            clients_num--;
+            clients_pid[i]=clients_pid[clients_num];
+            clients_mqid[i]=clients_mqid[clients_num];
+            return;
+        }
+            
+    }
+    printf("Can't find client message queue identifiers");
+    exit(EXIT_FAILURE);  
+}
 
+void process_stop(pid_t pid,char *buffer){
+    remove_client_mqid(pid);
 }
 
 void receive(){
@@ -157,7 +175,7 @@ void receive(){
         exit (EXIT_FAILURE);
     }
 
-    printf("Server receives %s from client %d\n",message.message_text.buf,message.message_text.pid);
+    printf("Server receives %s \"%s\" from client %d\n",TO_STRING(message.message_type),message.message_text.buf,message.message_text.pid);
 
     switch (message.message_type){
         case REGISTER:
@@ -175,21 +193,31 @@ void receive(){
         case END:
             process_end(message.message_text.pid,message.message_text.buf);
             break;
-        case INIT:
-            process_init(message.message_text.pid,message.message_text.buf);
-            break;    
+        case STOP:
+            process_stop(message.message_text.pid,message.message_text.buf);
+            break;              
         default:
             printf ("unknown message type");
             exit (EXIT_FAILURE);      
     }
 }
 
+void sever_exit(void){
+    for(int i=0;i<clients_num;i++)
+        kill(clients_pid[i],SIGTERM);
+    remove_queue();
+}
+
+void sigint_handler(int sig_no) {
+    exit(sig_no);
+}
+
 int main (int argc, char **argv){
 
-    if(atexit(remove_queue) == -1){
-        perror ("server atexit registration error!");
-        exit (EXIT_FAILURE);        
-    } 
+    if (signal(SIGINT,sigint_handler) == SIG_ERR){
+        perror("SIGINT error");
+        exit(EXIT_FAILURE);
+    }
 
     char* path = getenv("HOME");
     if(path == NULL){
@@ -207,6 +235,11 @@ int main (int argc, char **argv){
         perror ("server msgget error");
         exit (EXIT_FAILURE);
     }
+
+    if(atexit(sever_exit) == -1){
+        perror ("server atexit registration error!");
+        exit (EXIT_FAILURE);        
+    } 
 
     printf("Server %d\n", getpid());
 

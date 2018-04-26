@@ -1,0 +1,6 @@
+MIRROR
+Ala ma psa
+CALC
+2+3
+TIME
+END

@@ -10,7 +10,16 @@
 #define CALC 3
 #define TIME 4
 #define END 5
-#define INIT 6
+#define STOP 6
+
+#define TO_STRING(num) ( \
+    num == REGISTER ? "REGISTER" : ( \
+    num == MIRROR ? "MIRROR" : ( \
+    num == CALC ? "CALC" : ( \
+    num == TIME ? "TIME" : ( \
+    num == END ? "END" : ( \
+    num == STOP ? "STOP" : "UNKNOWN" \
+    ))))))
 
 #define BUFFER_SIZE 256
 #define CLIENTS_MAX_NUM 10

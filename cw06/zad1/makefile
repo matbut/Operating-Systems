@@ -3,13 +3,15 @@ CFLAGS=-Wall -std=c11 -ggdb
 CPPFLAGS=
 SLAVE=client
 MASTER=server
+HEADER=message.h
+FILE=commands.txt
 
 all: $(SLAVE) $(MASTER)
 
-$(SLAVE): $(SLAVE).c 
+$(SLAVE): $(SLAVE).c $(HEADER)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $^ -o $@
 
-$(MASTER): $(MASTER).c 
+$(MASTER): $(MASTER).c $(HEADER)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $^ -o $@
 
 .PHONY: clean
@@ -20,5 +22,5 @@ clean:
 test: $(MASTER) $(SLAVE)
 	./$(MASTER) &
 	./$(SLAVE) &
-	./$(SLAVE) &
-	./$(SLAVE) &
+	./$(SLAVE) $(FILE) &
+	
