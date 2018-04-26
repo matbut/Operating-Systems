@@ -4,20 +4,22 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/msg.h>
+#include <mqueue.h>
 #include <string.h>
 #include <fcntl.h>
 #include <signal.h>
 #include "message.h"
 
-int server_mqid,my_mqid;
+mqd_t private_id,public_id;
+
+char path[50];
 
 FILE*file;
 
 void send_message(int type,char* format,...){
 
     struct message message;
+
     message.message_text.pid=getpid();
     message.message_type=type;
 
@@ -27,19 +29,31 @@ void send_message(int type,char* format,...){
     
     printf("Client %d sends %s \"%s\" to server\n",getpid(),TO_STRING(message.message_type),message.message_text.buf);
 
-    if (msgsnd (server_mqid, &message, sizeof (struct message_text), 0) == -1) {
-        perror ("client msgsnd error");
+    if(mq_send(public_id, (char*) &message, sizeof(struct message), 1) == -1){
+        perror("client mq_send error");
         exit (EXIT_FAILURE);
-    }
+    } 
+
 }
 
 void remove_queue(void){
     printf("Client %d removes queue\n",getpid());
 
-    if (msgctl (my_mqid, IPC_RMID, NULL) == -1) {
-            perror ("client msgctl error");
-            exit (EXIT_FAILURE);
+    if(mq_close(public_id) == -1){
+        perror("client mq_close server's queue error");
+        exit (EXIT_FAILURE);
     }
+
+    if(mq_close(private_id) == -1){
+        perror("client mq_close client's queue error");
+        exit (EXIT_FAILURE);
+    }
+
+    if(mq_unlink(path) == -1){
+        perror("client mq_unlink error");
+        exit (EXIT_FAILURE);
+    }
+
 }
 
 void client_exit(void){
@@ -51,10 +65,10 @@ void receive_message(){
 
     struct message message;
 
-    if (msgrcv (my_mqid, &message, sizeof (struct message_text), 0, 0) == -1) {
-        perror ("client msgrcv error");
-        exit (EXIT_FAILURE);
-    }
+    if(mq_receive(private_id,(char*) &message, sizeof(struct message), NULL) == -1){
+        perror("client mq_receive error");
+        exit(EXIT_FAILURE);
+    } 
 
     printf ("Client %d received %s \"%s\" from server\n\n",getpid(),TO_STRING(message.message_type),message.message_text.buf);  
 }
@@ -95,7 +109,7 @@ void read_message(char*buffer){
         if (buffer[length-1] == '\n')
             buffer[length-1] = '\0';
     }else{
-        perror("Client fgets error");
+        perror("client fgets error");
         exit (EXIT_FAILURE);
     }
 }
@@ -112,12 +126,12 @@ void sigterm_handler(int sig_no) {
 int main (int argc, char **argv){
 
     if (signal(SIGINT,sigint_handler) == SIG_ERR){
-        perror("SIGINT error");
+        perror("client SIGINT error");
         exit(EXIT_FAILURE);
     }
 
     if (signal(SIGTERM,sigterm_handler) == SIG_ERR){
-        perror("SIGTERM error");
+        perror("client SIGTERM error");
         exit(EXIT_FAILURE);
     }
 
@@ -125,7 +139,7 @@ int main (int argc, char **argv){
     if (argc==2) {
         file = fopen(argv[1], "r");
         if(file==NULL){
-            perror("fopen error"); 
+            perror("client fopen error"); 
             exit(EXIT_FAILURE);
         }
     }else if(argc!=1){
@@ -134,37 +148,36 @@ int main (int argc, char **argv){
     }
     
 
-    key_t server_queue_key;
- 
-    if ((my_mqid = msgget (IPC_PRIVATE, QUEUE_PERMISSIONS)) == -1) {
-        perror ("client msgget error");
-        exit (EXIT_FAILURE);
-    }
-
-    char* path = getenv("HOME");
-    if(path == NULL){
-        perror ("server getenv \"HOME\" error");
+    public_id = mq_open(server_path, O_WRONLY);
+    if(public_id == -1){
+        perror ("client mq_open server's queue error!");
         exit (EXIT_FAILURE);  
     }
 
-    if ((server_queue_key = ftok (path, PROJECT_ID)) == -1) {
-        perror ("client ftok error");
-        exit (EXIT_FAILURE);
-    }
+    struct mq_attr posixAttr;
 
-    if ((server_mqid = msgget (server_queue_key, 0)) == -1) {
-        perror ("client msgget error");
-        exit (EXIT_FAILURE);
-    }
+    posixAttr.mq_maxmsg = QUEUE_MAX_SIZE;
+    posixAttr.mq_msgsize = sizeof(struct message);
+
+    sprintf(path, "/%d", getpid());
+
+    private_id = mq_open(path, O_RDONLY | O_CREAT | O_EXCL, 0666, &posixAttr);
+    if(private_id == -1){
+        perror ("client mq_open error");
+        exit (EXIT_FAILURE);  
+    } 
+    
+    printf("client mqid %d \n",private_id);
+
 
     if(atexit(client_exit) == -1){
-        perror ("client atexit registration error!");
+        perror ("client atexit registration error");
         exit (EXIT_FAILURE);        
     } 
 
     printf("New client %d\n", getpid());
 
-    send_message(REGISTER,"%d",my_mqid);
+    send_message(REGISTER,"%d",private_id);
     receive_message();
 
     char buffer[BUFFER_SIZE];

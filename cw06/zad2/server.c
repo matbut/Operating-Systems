@@ -5,15 +5,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/msg.h>
+#include <mqueue.h>
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <signal.h>
 #include "message.h"
 
-int qid;
+mqd_t public_id;
 
 pid_t clients_pid[CLIENTS_MAX_NUM];
 int clients_mqid[CLIENTS_MAX_NUM]; // message queue identifiers
@@ -34,8 +33,13 @@ void remove_queue(void){
 
     printf("Server removes queue\n");
 
-    if (msgctl (qid, IPC_RMID, NULL) == -1) {
-        perror ("server msgctl error");
+    if(mq_close(public_id) == -1){
+        perror ("server mg_close error");
+        exit (EXIT_FAILURE);
+    }
+
+    if(mq_unlink(server_path) == -1){
+        perror ("server mq_unlink error");
         exit (EXIT_FAILURE);
     }
 }
@@ -43,6 +47,7 @@ void remove_queue(void){
 void response(pid_t pid,int type,char* format,...){
 
     struct message message;
+
     message.message_text.pid=getpid();
     message.message_type=type;
 
@@ -51,13 +56,13 @@ void response(pid_t pid,int type,char* format,...){
     vsprintf(message.message_text.buf,format,ap);
 
     int client_mqid = get_client_mqid(pid);
-    
+
     printf("Server sends %s \"%s\" to client %d\n",TO_STRING(message.message_type),message.message_text.buf,(int) pid);
 
-    if (msgsnd (client_mqid, &message, sizeof (struct message_text), 0) == -1) {
-        perror ("client msgsnd error");
+    if(mq_send(client_mqid, (char*) &message, sizeof(struct message), 1) == -1){
+        perror("server mq_send error!");
         exit (EXIT_FAILURE);
-    }
+    } 
 }
 
 char* reverse(char *base){
@@ -74,14 +79,24 @@ char* reverse(char *base){
 void process_register(pid_t pid,char *buffer){
     int client_mqid;
     if(sscanf(buffer, "%d", &client_mqid) < 0){
-        perror("cant'scanf message queue identifier");
+        perror("server process_register sscanf error");
         exit (EXIT_FAILURE);
     } 
 
     if(clients_num > CLIENTS_MAX_NUM-1){
-        printf("Maximum amount of clients reached!\n");
+        printf("Maximum clients number reached\n");
+        exit(EXIT_FAILURE);
     }else{
-        
+
+        char clientPath[15];
+        sprintf(clientPath, "/%d", pid);
+
+        int clientMQD = mq_open(clientPath, O_WRONLY);
+        if(clientMQD == -1 ){
+            perror ("server mq_open client queue error");
+            exit (EXIT_FAILURE);  
+        }
+
         clients_pid[clients_num]=pid;
         clients_mqid[clients_num] = client_mqid;
         clients_num++;
@@ -121,7 +136,7 @@ void process_calc(pid_t pid,char *buffer){
             perror("illegal calculator operation");
             exit (EXIT_FAILURE);
     }
-    response(pid,REGISTER,"%d",a);
+    response(pid,CALC,"%d",a);
 }
 
 void process_time(pid_t pid,char *buffer){
@@ -160,19 +175,25 @@ void receive(){
 
     struct message message;
 
-    int msgflg=0;
+    struct mq_attr currentState;
+    
     if(end_flag){
-        msgflg=IPC_NOWAIT;
+        if(mq_getattr(public_id, &currentState) == -1){
+            perror("server mq_getattr error");
+            exit(EXIT_FAILURE);
+        }
+        
+        if(currentState.mq_curmsgs == 0){
+            printf("Server ends...");
+            exit(EXIT_SUCCESS);
+        }
+            
     }
 
-    if (msgrcv (qid, &message, sizeof (struct message_text), 0, msgflg) == -1) {
-        if(end_flag){
-            printf("Server ends...");
-            exit (EXIT_SUCCESS); //no bo skonczyly sie wiadomosci, a jest flaga IPC_NOWAIT
-        }
-        perror ("server msgrcv error");
-        exit (EXIT_FAILURE);
-    }
+    if(mq_receive(public_id,(char*) &message, sizeof(struct message), NULL) == -1){
+        perror("server mq_receive error");
+        exit(EXIT_FAILURE);
+    } 
 
     printf("Server receives %s \"%s\" from client %d\n",TO_STRING(message.message_type),message.message_text.buf,message.message_text.pid);
 
@@ -217,26 +238,20 @@ int main (int argc, char **argv){
         perror("SIGINT error");
         exit(EXIT_FAILURE);
     }
+    
+    struct mq_attr posixAttr;
 
-    char* path = getenv("HOME");
-    if(path == NULL){
-        perror ("server getenv \"HOME\" error");
+    posixAttr.mq_maxmsg = QUEUE_MAX_SIZE;
+    posixAttr.mq_msgsize = sizeof(struct message);
+
+    public_id = mq_open(server_path, O_RDONLY | O_CREAT | O_EXCL, 0666, &posixAttr);
+    if(public_id == -1){
+        perror ("server mq_open server's queue error");
         exit (EXIT_FAILURE);  
     }
 
-    key_t msg_queue_key;
-    if ((msg_queue_key = ftok (path, PROJECT_ID)) == -1) {
-        perror ("server ftok error");
-        exit (EXIT_FAILURE);
-    }
-
-    if ((qid = msgget (msg_queue_key, IPC_CREAT | QUEUE_PERMISSIONS)) == -1) {
-        perror ("server msgget error");
-        exit (EXIT_FAILURE);
-    }
-
     if(atexit(sever_exit) == -1){
-        perror ("server atexit registration error!");
+        perror ("server atexit registration error");
         exit (EXIT_FAILURE);        
     } 
 
