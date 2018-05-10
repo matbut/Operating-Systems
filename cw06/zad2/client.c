@@ -177,7 +177,7 @@ int main (int argc, char **argv){
 
     printf("New client %d\n", getpid());
 
-    send_message(REGISTER,"%d",private_id);
+    send_message(REGISTER,"%d","");
     receive_message();
 
     char buffer[BUFFER_SIZE];

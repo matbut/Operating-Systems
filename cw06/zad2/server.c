@@ -77,11 +77,6 @@ char* reverse(char *base){
 }
 
 void process_register(pid_t pid,char *buffer){
-    int client_mqid;
-    if(sscanf(buffer, "%d", &client_mqid) < 0){
-        perror("server process_register sscanf error");
-        exit (EXIT_FAILURE);
-    } 
 
     if(clients_num > CLIENTS_MAX_NUM-1){
         printf("Maximum clients number reached\n");
@@ -98,7 +93,7 @@ void process_register(pid_t pid,char *buffer){
         }
 
         clients_pid[clients_num]=pid;
-        clients_mqid[clients_num] = client_mqid;
+        clients_mqid[clients_num] = clientMQD;
         clients_num++;
         response(pid,REGISTER,"%d",clients_num-1);
         
