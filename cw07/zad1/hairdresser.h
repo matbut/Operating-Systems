@@ -36,7 +36,6 @@ void sem_wait_taken(int num);
 void sem_take(int num);
 void sem_give(int num);
 int sem_is_taken(int num);
-int semval(int num);
 
 //QUEUE
 

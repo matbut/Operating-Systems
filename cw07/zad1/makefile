@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-Wall -std=c11 -ggdb
 CPPFLAGS=
-LDLIBS =-lrt
+LDLIBS =
 SLAVE=client
 MAIN=main
 MASTER=barber
@@ -28,7 +28,7 @@ clean:
 	-rm -rf *.o $(SLAVE) $(MASTER) $(MAIN) lib$(LIB).a
 
 test: all
-	./$(MASTER) 5 &
-	./$(MAIN) 3 5 &
+	./$(MASTER) 3 &
+	./$(MAIN) 10 10 &
 	
 	

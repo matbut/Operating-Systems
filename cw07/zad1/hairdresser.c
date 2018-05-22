@@ -87,15 +87,6 @@ void sem_give(int num){
     sem(num,1);
 }
 
-int semval(int num){
-    int semval;
-    if ((semval = semctl(semid, num, GETVAL, 0)) == -1){
-        perror ("semctl GETVAL error");
-        exit (EXIT_FAILURE);
-    } 
-    return semval;
-}
-
 int sem_is_taken(int num){
     int semval;
     if ((semval = semctl(semid, num, GETVAL, 0)) == -1){

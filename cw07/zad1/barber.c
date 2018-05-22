@@ -32,6 +32,7 @@ void fall_asleep(){
     PRINT("is waking up");
 }
 
+//
 
 void barber_hairdresser_init(int chairs_num){
     char* path = getenv("HOME");
@@ -62,19 +63,13 @@ void barber_hairdresser_init(int chairs_num){
         perror ("semget error");
         exit (EXIT_FAILURE);
     } 
-    if (semctl(semid, HAIRDRESSER_SEM, SETVAL, 1) == -1){
-        perror ("semctl error");
-        exit (EXIT_FAILURE);
-    } 
-    if (semctl(semid, CLIENT_READY_SEM, SETVAL, 0) == -1){
-        perror ("semctl error");
-        exit (EXIT_FAILURE);
-    } 
-    if (semctl(semid, BARBER_READY_SEM, SETVAL, 0) == -1){
-        perror ("semctl error");
-        exit (EXIT_FAILURE);
-    } 
-    if (semctl(semid, AWAKE_SEM, SETVAL, 0) == -1){
+
+    if (
+        (semctl(semid, HAIRDRESSER_SEM, SETVAL, 1) == -1) ||
+        (semctl(semid, CLIENT_READY_SEM, SETVAL, 0) == -1) ||
+        (semctl(semid, BARBER_READY_SEM, SETVAL, 0) == -1) ||
+        (semctl(semid, AWAKE_SEM, SETVAL, 0) == -1)
+    ){
         perror ("semctl error");
         exit (EXIT_FAILURE);
     } 
@@ -98,7 +93,7 @@ void at_exit(){
     _exit(EXIT_SUCCESS);
 }
 
-void int_handler(int signo){
+void sigterm_handler(int signo){
     exit(signo);
 }
 
@@ -115,7 +110,7 @@ int main(int argc, char **argv)
         perror("Barber: atexit error");
         exit(EXIT_FAILURE);
     }
-    if (signal(SIGINT, int_handler) == SIG_ERR){
+    if (signal(SIGTERM, sigterm_handler) == SIG_ERR){
         perror("Barber: signal error");
         exit(EXIT_FAILURE);
     }
@@ -140,7 +135,6 @@ int main(int argc, char **argv)
 
             
             sem_take(HAIRDRESSER_SEM);
-            //Gdy golibroda skończy strzyżenie, klient opuszcza zakład. 
             //Golibroda ponownie sprawdza poczekalnię.
         }
         sem_give(HAIRDRESSER_SEM);
@@ -154,27 +148,6 @@ int main(int argc, char **argv)
         sem_take(CLIENT_READY_SEM); //czekamy aż klient pójdzie
 
     }
-
-
-    /*
-
-    const char *message = "Test write";
-    int shmFd;
-    char *shmArray;
-    char *stringPtr;
-
-    shmFd = shm_open(name, O_CREAT | O_RDWR, PERMISSIONS);
-    ftruncate(shmFd, SIZE);
-
-    shmArray = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shmFd, 0);
-
-    stringPtr = shmArray;
-    sprintf(stringPtr, "%s %d \n", message,getpid());
-
-    munmap(shmArray, SIZE);
-
-    close(shmFd);
-    */
 
     return 0;
 }

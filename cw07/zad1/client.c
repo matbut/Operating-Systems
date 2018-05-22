@@ -16,6 +16,7 @@
 
 pid_t pid;
 Hairdresser* hairdresser;
+int ready=0;
 
 #define PRINT(format, ...)  \
     printf("%ld us Client %d ",get_time(),pid); \
@@ -34,8 +35,7 @@ int is_sleeping(){
     return !sem_is_taken(AWAKE_SEM);
 }
 
-
-//MAIN
+//
 
 void client_hairdresser_init(){
     char* path = getenv("HOME");
@@ -74,7 +74,7 @@ void at_exit(){
     _exit(EXIT_SUCCESS);
 }
 
-int ready=0;
+
 
 void sigusr1_handler(int signo){
     ready=1;
@@ -107,8 +107,7 @@ int main(int argc, char **argv)
         sem_take(HAIRDRESSER_SEM);
         PRINT("is coming");
         //nowy klient sprawdza,
-            //czy w poczekalni jest wolne krzesło. 
-        
+        //czy w poczekalni jest wolne krzesło. 
         while(queue_is_full(hairdresser)){
             //W przeciwnym razie klient opuszcza zakład.
             PRINT("is leaving because of full queue");
@@ -139,34 +138,11 @@ int main(int argc, char **argv)
         sem_give(CLIENT_READY_SEM);
 
         sem_take(BARBER_READY_SEM); // czekamy az golibroda obetnie
-        PRINT("was cut and is leaving");
+        PRINT("was cut and is leaving"); //Gdy golibroda skończy strzyżenie, klient opuszcza zakład. 
         sem_give(CLIENT_READY_SEM);
     }
     
     PRINT("is dead");
 
-
-
-
-    /*
-
-    int shmFd;
-    char *shmArray;
-
-    shmFd = shm_open(name, O_RDONLY, PERMISSIONS);
-    if (shmFd == -1) {
-        perror("Shared memory reader: ");
-        exit(1);
-    }
-
-    shmArray = mmap(0, SIZE, PROT_READ, MAP_SHARED, shmFd, 0);
-
-    printf("%s", shmArray);
-
-    munmap(shmArray, SIZE);
-    close(shmFd);
-
-    shm_unlink(name);
-    */
     return 0;
 }
