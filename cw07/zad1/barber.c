@@ -87,6 +87,10 @@ void barber_hairdresser_delete(){
         perror ("Barber: shmctl error");
         exit (EXIT_FAILURE);
     } 
+    if((semctl(semid,0, IPC_RMID, NULL))==-1){
+        perror ("Barber: semctl error");
+        exit (EXIT_FAILURE);
+    } 
 }
 void at_exit(){
     barber_hairdresser_delete();
@@ -111,6 +115,11 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
     if (signal(SIGTERM, sigterm_handler) == SIG_ERR){
+        perror("Barber: signal error");
+        exit(EXIT_FAILURE);
+    }
+    
+    if (signal(SIGINT, sigterm_handler) == SIG_ERR){
         perror("Barber: signal error");
         exit(EXIT_FAILURE);
     }
