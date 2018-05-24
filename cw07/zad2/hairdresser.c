@@ -66,7 +66,7 @@ pid_t queue_get(Hairdresser * hairdresser){
 
 
 void sem_wait_taken(sem_t *sem){
-    while(sem_is_taken(sem));
+    while(!sem_is_taken(sem));
 }
 
 void sem_take(sem_t *sem){

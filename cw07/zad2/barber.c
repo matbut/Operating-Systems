@@ -94,11 +94,11 @@ void barber_hairdresser_delete(){
     }   
 
     if(
-        sem_unlink(hairdresser_path)==-1 ||
         sem_unlink(hairdresser_sem_path)==-1 ||
         sem_unlink(client_ready_sem_path)==-1 ||
         sem_unlink(barber_ready_sem_path)==-1 ||
-        sem_unlink(awake_sem_path)==-1 
+        sem_unlink(awake_sem_path)==-1 ||
+        sem_unlink(hairdresser_path)==-1
         ){
         perror ("Barber: sem_unlink error");
         exit (EXIT_FAILURE); 
@@ -130,7 +130,10 @@ int main(int argc, char **argv)
         perror("Barber: signal error");
         exit(EXIT_FAILURE);
     }
-    
+    if (signal(SIGINT, sigterm_handler) == SIG_ERR){
+        perror("Barber: signal error");
+        exit(EXIT_FAILURE);
+    }
     barber_hairdresser_init(atoi(argv[1]));
 
     while(1){
