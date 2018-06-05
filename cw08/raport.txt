@@ -1,0 +1,45 @@
+
+1 Filter filter1.fltr 
+
+1 threads. Time:
+   Real      User      System
+0.060000   0.050000   0.000000 
+2 threads. Time:
+   Real      User      System
+0.030000   0.060000   0.000000 
+4 threads. Time:
+   Real      User      System
+0.030000   0.090000   0.000000 
+8 threads. Time:
+   Real      User      System
+0.030000   0.100000   0.000000 
+
+2 Filter filter2.fltr 
+
+1 threads. Time:
+   Real      User      System
+0.730000   0.730000   0.000000 
+2 threads. Time:
+   Real      User      System
+0.480000   0.880000   0.010000 
+4 threads. Time:
+   Real      User      System
+0.460000   1.070000   0.000000 
+8 threads. Time:
+   Real      User      System
+0.410000   1.060000   0.010000 
+
+3 Filter filter3.fltr 
+
+1 threads. Time:
+   Real      User      System
+4.090000   4.060000   0.000000 
+2 threads. Time:
+   Real      User      System
+2.120000   4.020000   0.000000 
+4 threads. Time:
+   Real      User      System
+2.310000   6.170000   0.020000 
+8 threads. Time:
+   Real      User      System
+1.630000   6.320000   0.000000 
