@@ -27,7 +27,7 @@ int nk; //program end
 char **buffer;
 pthread_mutex_t **buffer_mutex;
 int consumption_index = 0, products_num = 0;
-pthread_mutex_t *consumption_index_mutex,*products_num_mutex;
+pthread_mutex_t *consumption_index_mutex,*products_num_mutex,*file_mutex;
 pthread_cond_t *empty_buffer_cond;
 pthread_cond_t *full_buffer_cond;
 
@@ -53,51 +53,74 @@ int is_empty(){
 int is_full(){
     return products_num>=N;
 }
-void put_string(char* string){
 
-    pthread_mutex_lock(products_num_mutex);
+void lock(pthread_mutex_t *mutex){
+    if(pthread_mutex_lock(mutex)!=0){
+        perror("pthread_mutex_lock");
+        exit(EXIT_FAILURE);
+    }
+}
+void unlock(pthread_mutex_t *cond){
+    if(pthread_mutex_unlock(cond)!=0){
+        perror("pthread_mutex_unlock");
+        exit(EXIT_FAILURE);
+    }
+}
+void broadcast(pthread_cond_t *mutex){
+    if(pthread_cond_broadcast(mutex)!=0){
+        perror("pthread_cond_broadcast");
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+void put_string(char* string){
+    lock(products_num_mutex);
     while(is_full()){
         print_producer("is waiting for not full buffer");
         pthread_cond_wait(full_buffer_cond,products_num_mutex);
     }
 
-    pthread_mutex_lock(consumption_index_mutex);
+    lock(consumption_index_mutex);
     int idx=(consumption_index+products_num)%N;
     print_producer("is in buffer[%d]",idx);
-    pthread_mutex_unlock(consumption_index_mutex);
+    unlock(consumption_index_mutex);
     products_num++;
-
-    pthread_mutex_lock(buffer_mutex[idx]);  
-    pthread_mutex_unlock(products_num_mutex);
+    lock(buffer_mutex[idx]);  
+    unlock(products_num_mutex);
       
-    buffer[idx]=string;
-    print_producer("produce for buffer[%d]",idx);
-    pthread_mutex_unlock(buffer_mutex[idx]);
+    buffer[idx] = malloc((strlen(string) + 1) * sizeof(char));
+    strcpy(buffer[idx], string);
+
+    print_producer("put string to buffer[%d]",idx);
+    unlock(buffer_mutex[idx]);
+    broadcast(empty_buffer_cond);
 }
 
 char* get_string(){
     char* string;
-    pthread_mutex_lock(products_num_mutex);
+    lock(products_num_mutex);
     while(is_empty()){
         print_consumer("is waiting for not empty buffer");
-        pthread_cond_wait(full_buffer_cond,products_num_mutex);
+        pthread_cond_wait(empty_buffer_cond,products_num_mutex);
     }
-    pthread_mutex_lock(consumption_index_mutex);
+    lock(consumption_index_mutex);
     products_num--;
-    pthread_mutex_unlock(products_num_mutex);
+    unlock(products_num_mutex);
 
-    pthread_mutex_lock(buffer_mutex[consumption_index]);
+    lock(buffer_mutex[consumption_index]);
     print_consumer("is in buffer[%d]",consumption_index);
     string=buffer[consumption_index];
     buffer[consumption_index]=NULL;
+    print_consumer("get string from buffer[%d]",consumption_index);
+    unlock(buffer_mutex[consumption_index]);
+
     consumption_index++;
-    print_consumer("consume buffer[%d]",consumption_index);
     if(consumption_index>=N){
         consumption_index=0;
     }   
-    pthread_mutex_unlock(buffer_mutex[consumption_index]);
-    pthread_mutex_unlock(consumption_index_mutex);
-
+    unlock(consumption_index_mutex);
+    broadcast(full_buffer_cond);
     return string;
 }
 
@@ -109,7 +132,8 @@ void end(){
         }
     }
     if(pthread_mutex_destroy(consumption_index_mutex)!=0 ||
-        pthread_mutex_destroy(products_num_mutex)!=0){
+        pthread_mutex_destroy(products_num_mutex)!=0 ||
+        pthread_mutex_destroy(file_mutex)!=0){
         perror("pthread_mutex_destroy");
         exit(EXIT_FAILURE);
     }    
@@ -136,10 +160,14 @@ void init(){
     signal(SIGINT, sig_hanlder);
     if (nk > 0) signal(SIGALRM, sig_hanlder);
 
+    buffer = malloc(N * sizeof(char*));
+
     buffer_mutex = malloc(N * sizeof(pthread_mutex_t*));
     for(int i=0;i<N;i++){
         buffer_mutex[i]=malloc(sizeof(pthread_mutex_t));
-        if(pthread_mutex_init(buffer_mutex[i], NULL)!=0){   
+        if(pthread_mutex_init(buffer_mutex[i], NULL)!=0 
+        //||pthread_mutexattr_settype(buffer_mutex[i],PTHREAD_MUTEX_ERRORCHECK)
+            ){   
             perror("pthread_mutex_init");
             exit(EXIT_FAILURE);  
         }
@@ -147,8 +175,13 @@ void init(){
     
     consumption_index_mutex=malloc(sizeof(pthread_mutex_t));
     products_num_mutex=malloc(sizeof(pthread_mutex_t));
+    file_mutex=malloc(sizeof(pthread_mutex_t));
     if(pthread_mutex_init(consumption_index_mutex, NULL)!=0 ||
-        pthread_mutex_init(products_num_mutex, NULL)!=0){   
+        pthread_mutex_init(products_num_mutex, NULL)!=0 ||
+        pthread_mutex_init(file_mutex, NULL)!=0
+        //|| pthread_mutexattr_settype(consumption_index_mutex,PTHREAD_MUTEX_ERRORCHECK) 
+        //|| pthread_mutexattr_settype(products_num_mutex,PTHREAD_MUTEX_ERRORCHECK)
+        ){   
         perror("pthread_mutex_init");
         exit(EXIT_FAILURE);  
     }
@@ -174,19 +207,22 @@ void *producer(void *args) {
     
     char * line = NULL;
     size_t len = 0;
-    ssize_t read;
+    ssize_t read = 0;
+
+    lock(file_mutex);
     while ((read = getline(&line, &len, fp)) != -1) {
-        print_producer("read next line");
+        unlock(file_mutex);
+        print_producer("read next line:  \"%s \"",line);
         put_string(line);
+        lock(file_mutex);
     }
+    unlock(file_mutex);
 
     if(fclose(fp)!=0){
         perror(file_path);
         exit(EXIT_FAILURE);
     }
     
-    if (line)
-        free(line);
     print_producer("end production");
     return NULL;
 }
@@ -207,10 +243,10 @@ void config(char *config_path) {
 
 
 void *consumer(void *args) {
-    print_producer("started consumption");
+    print_consumer("started consumption");
     while(1){
         char*string = get_string();
-        print_producer("consume %s",string);
+        print_consumer("consume string \"%s\"",string);
         free(string);
     }
     return NULL;

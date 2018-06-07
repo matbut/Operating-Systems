@@ -14,6 +14,6 @@ clean:
 	-rm -rf *.o $(PROGNAME) 
 
 test: $(PROGNAME)
-	./$(PROGNAME) $(CONFIG)
+	./$(PROGNAME) $(CONFIG)2
 
 
