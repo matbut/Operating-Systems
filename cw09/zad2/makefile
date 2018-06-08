@@ -19,4 +19,3 @@ test1: $(PROGNAME)
 test2: $(PROGNAME)
 	./$(PROGNAME) $(CONFIG)2
 
-

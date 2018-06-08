@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <signal.h>
-#include <stdarg.h>
+#include <semaphore.h>
 
 int P; //producers
 int K; //consumers
@@ -23,11 +23,9 @@ int print_type;
 int nk; //program end
 
 char **buffer;
-pthread_mutex_t **buffer_mutex;
+sem_t **buffer_mutex;
 int consumption_index = 0, products_num = 0;
-pthread_mutex_t *consumption_index_mutex,*products_num_mutex,*file_mutex;
-pthread_cond_t *empty_buffer_cond;
-pthread_cond_t *full_buffer_cond;
+sem_t *consumption_index_mutex,*products_num_mutex,*file_mutex;
 
 int finished = 0;
 pthread_t *producer_threads;
@@ -52,21 +50,15 @@ int is_full(){
     return products_num>=N;
 }
 
-void lock(pthread_mutex_t *mutex){
-    if(pthread_mutex_lock(mutex)!=0){
+void lock(sem_t *mutex){
+    if(sem_wait(mutex)!=0){
         perror("pthread_mutex_lock");
         exit(EXIT_FAILURE);
     }
 }
-void unlock(pthread_mutex_t *cond){
-    if(pthread_mutex_unlock(cond)!=0){
+void unlock(sem_t *cond){
+    if(sem_post(cond)!=0){
         perror("pthread_mutex_unlock");
-        exit(EXIT_FAILURE);
-    }
-}
-void broadcast(pthread_cond_t *mutex){
-    if(pthread_cond_broadcast(mutex)!=0){
-        perror("pthread_cond_broadcast");
         exit(EXIT_FAILURE);
     }
 }
@@ -74,8 +66,9 @@ void broadcast(pthread_cond_t *mutex){
 void put_string(char* string){
     lock(products_num_mutex);
     while(is_full()){
-        if(print_type) {print_producer("is waiting for not full buffer");}
-        pthread_cond_wait(full_buffer_cond,products_num_mutex);
+        unlock(products_num_mutex);
+        //if(print_type) {print_producer("is waiting for not full buffer");}
+        lock(products_num_mutex);
     }
 
     lock(consumption_index_mutex);
@@ -91,19 +84,19 @@ void put_string(char* string){
 
     if(print_type) {print_producer("put string to buffer[%d]",idx);}
     unlock(buffer_mutex[idx]);
-    broadcast(empty_buffer_cond);
 }
 
 char* get_string(){
     char* string;
     lock(products_num_mutex);
     while(is_empty()){
+        unlock(products_num_mutex);
         if(finished){
             if(print_type) {print_consumer("end consumption");}
              pthread_exit(NULL);
         }
-        if(print_type) {print_consumer("is waiting for not empty buffer");}
-        pthread_cond_wait(empty_buffer_cond,products_num_mutex);
+        //if(print_type) {print_consumer("is waiting for not empty buffer");}
+        lock(products_num_mutex);
     }
     lock(consumption_index_mutex);
     products_num--;
@@ -121,33 +114,27 @@ char* get_string(){
         consumption_index=0;
     }   
     unlock(consumption_index_mutex);
-    broadcast(full_buffer_cond);
     return string;
 }
 
 void end(){
     for(int i=0;i<N;i++){
-        if(pthread_mutex_destroy(buffer_mutex[i])!=0){
-            perror("pthread_mutex_destroy");
+        if(sem_destroy(buffer_mutex[i])!=0){
+            perror("sem_destroy");
             exit(EXIT_FAILURE);
         }
     }
-    if(pthread_mutex_destroy(consumption_index_mutex)!=0 ||
-        pthread_mutex_destroy(products_num_mutex)!=0 ||
-        pthread_mutex_destroy(file_mutex)!=0){
-        perror("pthread_mutex_destroy");
+    if(sem_destroy(consumption_index_mutex)!=0 ||
+        sem_destroy(products_num_mutex)!=0 ||
+        sem_destroy(file_mutex)!=0){
+        perror("sem_destroy");
         exit(EXIT_FAILURE);
-    }    
-    if(pthread_cond_destroy(empty_buffer_cond)!=0 ||
-        pthread_cond_destroy(full_buffer_cond)!=0 ){
-        perror("pthread_cond_destroy");
-        exit(EXIT_FAILURE);  
-    }  
-     
+    }   
+
     if(fclose(fp)!=0){
         perror(file_path);
         exit(EXIT_FAILURE);
-    }
+    }      
 }
 
 void thread_init(){
@@ -178,6 +165,7 @@ void init(){
         perror("sigaction");
         exit(EXIT_FAILURE);  
     }
+
     if(nk>0){
         if(sigaction(SIGALRM,&act,NULL)<0){
             perror("sigaction");
@@ -185,40 +173,31 @@ void init(){
         }
         alarm(nk);
     }
-    
     buffer = malloc(N * sizeof(char*));
 
-    buffer_mutex = malloc(N * sizeof(pthread_mutex_t*));
+    buffer_mutex = malloc(N * sizeof(sem_t*));
     for(int i=0;i<N;i++){
-        buffer_mutex[i]=malloc(sizeof(pthread_mutex_t));
-        if(pthread_mutex_init(buffer_mutex[i], NULL)!=0 
+        buffer_mutex[i]=malloc(sizeof(sem_t));
+        if(sem_init(buffer_mutex[i],0,1)!=0 
         //||pthread_mutexattr_settype(buffer_mutex[i],PTHREAD_MUTEX_ERRORCHECK)
             ){   
-            perror("pthread_mutex_init");
+            perror("sem_init");
             exit(EXIT_FAILURE);  
         }
     }
     
-    consumption_index_mutex=malloc(sizeof(pthread_mutex_t));
-    products_num_mutex=malloc(sizeof(pthread_mutex_t));
-    file_mutex=malloc(sizeof(pthread_mutex_t));
-    if(pthread_mutex_init(consumption_index_mutex, NULL)!=0 ||
-        pthread_mutex_init(products_num_mutex, NULL)!=0 ||
-        pthread_mutex_init(file_mutex, NULL)!=0
+    consumption_index_mutex=malloc(sizeof(sem_t));
+    products_num_mutex=malloc(sizeof(sem_t));
+    file_mutex=malloc(sizeof(sem_t));
+    if(sem_init(consumption_index_mutex, 0,1)!=0 ||
+        sem_init(products_num_mutex, 0,1)!=0 ||
+        sem_init(file_mutex, 0,1)!=0
         //|| pthread_mutexattr_settype(consumption_index_mutex,PTHREAD_MUTEX_ERRORCHECK) 
         //|| pthread_mutexattr_settype(products_num_mutex,PTHREAD_MUTEX_ERRORCHECK)
         ){   
-        perror("pthread_mutex_init");
+        perror("sem_init");
         exit(EXIT_FAILURE);  
     }
-
-    empty_buffer_cond=malloc(sizeof(pthread_cond_t));
-    full_buffer_cond=malloc(sizeof(pthread_cond_t));
-    if(pthread_cond_init(empty_buffer_cond,NULL)!=0 ||
-        pthread_cond_init(full_buffer_cond,NULL)!=0){
-        perror("pthread_cond_destroy");
-        exit(EXIT_FAILURE);  
-    }  
 
     fp = fopen(file_path, "r");
 
@@ -226,13 +205,13 @@ void init(){
         perror(file_path);
         exit(EXIT_FAILURE);
     }
-    
 }
 
 void *producer(void *args) {
     thread_init();
 
     if(print_type) {print_producer("started production");}
+
     
     char * line = NULL;
     size_t len = 0;
@@ -250,7 +229,6 @@ void *producer(void *args) {
     
     if(print_type) {print_producer("end production")};
     finished=1;
-    broadcast(empty_buffer_cond);
     return NULL;
 }
 void config(char *config_path) {
@@ -317,7 +295,6 @@ void start_threads() {
             perror("pthread_create");
             exit(EXIT_FAILURE);
         }
-    if (nk > 0) alarm(nk);
 }
 
 void join_threads(){
